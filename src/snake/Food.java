@@ -1,7 +1,10 @@
 package snake;
 
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
 
 /**
@@ -9,22 +12,27 @@ import snake.utilities.Object;
  * Created by Grzegorz Malinowski on 2017-04-29, 19:45.
  * gmalinowski@protonmail.com
  */
-public class Food extends Object {
+class Food extends Object {
+    private Rectangle food = ((Rectangle) super.getNode());
 
-    public Food(Node object, double x, double y) {
-        super(object, x, y);
+    Food(int foodSize, Color foodColor, double initPosX, double initPosY) {
+        super(new Rectangle(foodSize, foodSize, foodColor), initPosX, initPosY);
     }
 
-    public void randFoodCoord(double x, double y) {
+    void newFoodPosition(double x, double y) {
 
+    }
+
+    void newRandomFoodPosition(Point2D borderSize) {
+        double x = Math.random() * (borderSize.getX() - food.getWidth());
+        double y = Math.random() * (borderSize.getY() - food.getHeight());
+
+        food.setTranslateY(x);
+        food.setTranslateY(y);
     }
 
     Pane addToScene(Pane pane) {
-        pane.getChildren().add(head.getNode());
-
-        for (int i = 0; i < tail.size(); i++) {
-            pane.getChildren().add(tail.get(i).getNode());
-        }
+        pane.getChildren().add(food);
 
         return pane;
     }

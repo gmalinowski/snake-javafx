@@ -25,8 +25,10 @@ import static snake.utilities.Direction.*;
 public class SnakeApp extends Application {
     private final int width = 600, height = 600;
     private Pane root;
+    private Scene scene;
     private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
     private Snake snake = new Snake(25, 25, 5, Color.GREEN, Color.BLUE, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Food food = new Food(25, Color.ALICEBLUE, 300, 300);
     private int counter = 0, counterReset = 10;
     private Direction direction = RIGHT;
     private int moveOffSet = 25;
@@ -37,6 +39,7 @@ public class SnakeApp extends Application {
         root = new Pane();
         root.setPrefSize(width, height);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
+        root = food.addToScene(root);
         root = snake.addToScene(root);
     /////////////////////////////////////////////////////////////////// ANIMATION
         AnimationTimer timer = new AnimationTimer() {
@@ -59,6 +62,10 @@ public class SnakeApp extends Application {
         if (counter == counterReset) {
             counter = 0;
             move(direction, moveOffSet);
+
+            while (snake.isColliding(food)) {
+                food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
+            }
 
         }
 
@@ -94,7 +101,7 @@ public class SnakeApp extends Application {
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Scene scene = createScene();
+        scene = createScene();
         scene.setOnKeyPressed(this::moving);
 
         /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE

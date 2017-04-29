@@ -9,6 +9,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import snake.utilities.Object;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -61,4 +62,11 @@ public class Snake {
     public void setHeadBorder(Point2D point) {
         head.setBorder(point);
     }
+
+    boolean isColliding(Object other) {
+        return tail.stream().anyMatch(tile -> tile.isColliding(other)) ||
+                head.getNode().getBoundsInParent().intersects(other.getNode().getBoundsInParent());
+    }
+
+    //TODO czy head is cooliding with tail
 }
