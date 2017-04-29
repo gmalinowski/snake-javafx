@@ -2,22 +2,19 @@ package snake;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
-import sun.security.provider.SHA;
+import snake.utilities.ChangeListenerMSG;
+import snake.utilities.Direction;
 
-import static snake.Direction.*;
+import java.lang.*;
+
+import static snake.utilities.Direction.*;
 
 
 /**
@@ -28,7 +25,8 @@ import static snake.Direction.*;
 public class SnakeApp extends Application {
     private final int width = 600, height = 600;
     private Pane root;
-    private Snake snake = new Snake(25, 25, 5, Color.GREEN, Color.BLUE, new Point2D(width, height)); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
+    private Snake snake = new Snake(25, 25, 5, Color.GREEN, Color.BLUE, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
     private int counter = 0, counterReset = 10;
     private Direction direction = RIGHT;
     private int moveOffSet = 25;
@@ -99,6 +97,12 @@ public class SnakeApp extends Application {
         Scene scene = createScene();
         scene.setOnKeyPressed(this::moving);
 
+        /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE
+        if (snakeBorder != null) {
+            ChangeListenerMSG windowListener = new ChangeListenerMSG(snake, scene, true);
+            scene.widthProperty().addListener(windowListener);
+            scene.heightProperty().addListener(windowListener);
+        }
 
         primaryStage.setScene(scene);
         primaryStage.setAlwaysOnTop(true);

@@ -57,4 +57,8 @@ public class Snake {
             tail.get(i).setCoordinates(lastPos2);
         }
     }
+
+    public void setHeadBorder(Point2D point) {
+        head.setBorder(point);
+    }
 }

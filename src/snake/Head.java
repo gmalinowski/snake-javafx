@@ -2,6 +2,7 @@ package snake;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import snake.utilities.Object;
 
 
 /**
@@ -21,7 +22,7 @@ public class Head extends Object {
 
     @Override
     public void move(int xOffSet, int yOffSet) {
-        if (border != null) {
+        if (border != null) {//TODO naprawic przechodzenie przez sciany
             double x = object.getTranslateX() + xOffSet;
             double y = object.getTranslateY() + yOffSet;
             if (x < 0) setCoordinates(new Point2D(border.getX() - xOffSet, object.getTranslateY()));

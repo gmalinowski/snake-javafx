@@ -1,6 +1,7 @@
 package snake;
 
 import javafx.scene.Node;
+import snake.utilities.Object;
 
 /**
  * javaFXtut
