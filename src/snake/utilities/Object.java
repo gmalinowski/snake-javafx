@@ -33,6 +33,7 @@ public class Object {
         return object;
     }
 
+
     public boolean isColliding(Object other) {
         return object.getTranslateX() == other.getNode().getTranslateX() && object.getTranslateY() == other.getNode().getTranslateY();
 //        return object.getBoundsInParent().intersects(other.getNode().getBoundsInParent());

@@ -64,10 +64,13 @@ public class Snake {
         }
     }
 
-    void addTile() {
-        Node last = tail.get(tail.size() - 1).getNode();
-        Tile tile = new Tile(new Rectangle(tileSize, tileSize, tailColor), last.getLayoutX() + tileSize, last.getTranslateY() + tileSize);
+    Tile generateTile() {
+        Rectangle last = (Rectangle) tail.get(tail.size() - 1).getNode();
+        Rectangle newRect = new Rectangle(tileSize, tileSize, tailColor);
+        Tile tile = new Tile(newRect, last.getTranslateX(), last.getTranslateY());
         tail.add(tile);
+
+        return tile;
     }
 
     void addTileColor(Color color) {
