@@ -12,4 +12,5 @@ public class Tile extends Object {
     public Tile(Node object, double x, double y) {
         super(object, x, y);
     }
+
 }

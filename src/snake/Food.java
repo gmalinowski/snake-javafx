@@ -7,6 +7,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
 
+import java.util.Random;
+
 /**
  * javaFXtut
  * Created by Grzegorz Malinowski on 2017-04-29, 19:45.
@@ -19,15 +21,20 @@ class Food extends Object {
         super(new Rectangle(foodSize, foodSize, foodColor), initPosX, initPosY);
     }
 
-    void newFoodPosition(double x, double y) {
-
+    void setFoodPosition(double x, double y) {
+        food.setTranslateX(x);
+        food.setTranslateY(y);
     }
 
     void newRandomFoodPosition(Point2D borderSize) {
-        double x = Math.random() * (borderSize.getX() - food.getWidth());
-        double y = Math.random() * (borderSize.getY() - food.getHeight());
+        Random generator = new Random();
+        double x = generator.nextInt(10000) * food.getWidth();
+        x %= borderSize.getX() - food.getWidth();
 
-        food.setTranslateY(x);
+        double y = generator.nextInt(10000) * food.getHeight();
+        y %= borderSize.getY();
+
+        food.setTranslateX(x);
         food.setTranslateY(y);
     }
 

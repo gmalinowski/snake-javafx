@@ -23,14 +23,14 @@ import static snake.utilities.Direction.*;
  * gmalinowski@protonmail.com
  */
 public class SnakeApp extends Application {
-    private final int width = 600, height = 600;
+    private int width = 600, height = 600;
     private Pane root;
     private Scene scene;
     private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
-    private Snake snake = new Snake(25, 25, 5, Color.GREEN, Color.BLUE, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
-    private Food food = new Food(25, Color.ALICEBLUE, 300, 300);
+    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.GREEN, Color.BLUE, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Food food = new Food(25, Color.RED, 0, 0);
     private int counter = 0, counterReset = 10;
-    private Direction direction = RIGHT;
+    private Direction direction = UP;
     private int moveOffSet = 25;
 
 
@@ -39,9 +39,10 @@ public class SnakeApp extends Application {
         root = new Pane();
         root.setPrefSize(width, height);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
+        food.newRandomFoodPosition(new Point2D(width, height));
         root = food.addToScene(root);
         root = snake.addToScene(root);
-    /////////////////////////////////////////////////////////////////// ANIMATION
+    /////////////////////////////////////////////////////////////////// CALL UPDATE
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -63,6 +64,8 @@ public class SnakeApp extends Application {
             counter = 0;
             move(direction, moveOffSet);
 
+            if (snake.isColliding(food))
+                snake.addTile();
             while (snake.isColliding(food)) {
                 food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
             }
@@ -90,7 +93,7 @@ public class SnakeApp extends Application {
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL
-    private void moving(KeyEvent event) {
+    private void setDirection(KeyEvent event) {
         KeyCode code = event.getCode();//todo naprawic zabezpieczenie skrecania
         if (KeyCode.RIGHT == event.getCode() && direction != LEFT) direction = RIGHT;
         else if (KeyCode.DOWN == event.getCode() && direction != UP) direction = DOWN;
@@ -102,7 +105,7 @@ public class SnakeApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         scene = createScene();
-        scene.setOnKeyPressed(this::moving);
+        scene.setOnKeyPressed(this::setDirection);
 
         /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE
         if (snakeBorder != null) {

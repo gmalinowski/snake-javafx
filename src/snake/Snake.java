@@ -25,12 +25,17 @@ public class Snake {
     private Head head;
     private List<Tile> tail = new ArrayList<>();
 
-    Snake(int headSize, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border) {
-        head = new Head(new Rectangle(headSize, headSize, headColor), 200, 200);
+    private int tileSize;
+    private Color tailColor;
+
+    Snake(int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border) {
+        head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
         if (border != null) head.setBorder(border);
 
+        this.tileSize = tileSize;
+        this.tailColor = tailColor;
         for (int i = 0; i < tailLength; i++) {
-            tail.add(new Tile(new Rectangle(tileSize, tileSize, tailColor), 200, 200));
+            tail.add(new Tile(new Rectangle(tileSize, tileSize, tailColor), headPosX, ((headPosY+ tileSize) + i * tileSize)));
         }
 
     }
@@ -59,14 +64,25 @@ public class Snake {
         }
     }
 
+    void addTile() {
+        Node last = tail.get(tail.size() - 1).getNode();
+        Tile tile = new Tile(new Rectangle(tileSize, tileSize, tailColor), last.getLayoutX() + tileSize, last.getTranslateY() + tileSize);
+        tail.add(tile);
+    }
+
+    void addTileColor(Color color) {
+
+    }
+
     public void setHeadBorder(Point2D point) {
         head.setBorder(point);
     }
 
     boolean isColliding(Object other) {
         return tail.stream().anyMatch(tile -> tile.isColliding(other)) ||
-                head.getNode().getBoundsInParent().intersects(other.getNode().getBoundsInParent());
+                head.isColliding(other);
     }
+
 
     //TODO czy head is cooliding with tail
 }

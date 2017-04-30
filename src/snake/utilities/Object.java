@@ -12,6 +12,7 @@ import javafx.scene.Node;
 public class Object {
     protected Node object;
 
+
     public Object(Node object, double x, double y) {
         this.object = object;
         object.setTranslateX(x);
@@ -33,7 +34,8 @@ public class Object {
     }
 
     public boolean isColliding(Object other) {
-        return object.getBoundsInParent().intersects(other.getNode().getBoundsInParent());
+        return object.getTranslateX() == other.getNode().getTranslateX() && object.getTranslateY() == other.getNode().getTranslateY();
+//        return object.getBoundsInParent().intersects(other.getNode().getBoundsInParent());
     }
 
 }
