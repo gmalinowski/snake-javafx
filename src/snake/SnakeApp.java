@@ -4,16 +4,19 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import org.omg.PortableServer.POA;
 import snake.utilities.ChangeListenerMSG;
 import snake.utilities.Direction;
 
 import java.lang.*;
+import java.util.Random;
 
 import static snake.utilities.Direction.*;
 
@@ -28,21 +31,27 @@ public class SnakeApp extends Application {
     private Pane root;
     private Scene scene;
     private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
-    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.GREENYELLOW.brighter(), Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
-    private Food food = new Food(25, Color.TOMATO, 0, 0);
-    private int counter = 0, counterReset = 7;
+    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Food food = new Food(25, Color.ORANGE, 0, 0);
+    private int counter = 0, counterReset = 8;
     private Direction direction = UP;
     private int moveOffSet = 25;
+
+    private int points = 0;
+    private int foodPrice = 14 - counterReset;
+    private Label pointsLbl = new Label(Integer.toString(points));
 
 
 ////////////////////////////////////////////////////////////////////////////////////////    CREATE PANE - SCENE
     private Scene createScene() {
         root = new Pane();
         root.setPrefSize(width, height);
+        root.getChildren().add(pointsLbl);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
         food.newRandomFoodPosition(new Point2D(width, height));
         root = food.addToScene(root);
         root = snake.addToScene(root);
+
     /////////////////////////////////////////////////////////////////// CALL UPDATE
         AnimationTimer timer = new AnimationTimer() {
             @Override
@@ -66,10 +75,16 @@ public class SnakeApp extends Application {
             move(direction, moveOffSet);
 
             if (snake.isColliding(food)) {
-                if (snake.size() % 2 == 0)
+                points += foodPrice;
+                pointsLbl.setText(Integer.toString(points));
+                System.out.println(points);
+                double rand = Math.random();
+                if (rand < 0.33)
                     root.getChildren().add(snake.generateTile(snake.getTailColor().brighter()).getNode());
-                else
+                else if (rand < 0.66)
                     root.getChildren().add(snake.generateTile().getNode());
+                else
+                    root.getChildren().add(snake.generateTile(snake.getTailColor().darker()).getNode());
             }
 
             int newFoodCounter = 0;
@@ -119,6 +134,9 @@ public class SnakeApp extends Application {
 
         if (KeyCode.ESCAPE == event.getCode()) System.exit(0);
     }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////    SAVE SCORE TO FILE
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
     @Override

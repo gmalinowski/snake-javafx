@@ -1,3 +1,8 @@
 .root {
     -fx-background-color: black;
 }
+
+.label {
+    -fx-font-size: 200%;
+    -fx-text-fill: chartreuse;
+}
