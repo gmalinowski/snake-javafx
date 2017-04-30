@@ -6,3 +6,8 @@
     -fx-font-size: 200%;
     -fx-text-fill: chartreuse;
 }
+
+#bestScoreLbl {
+    -fx-text-fill: red;
+
+}
