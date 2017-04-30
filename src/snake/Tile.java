@@ -1,6 +1,7 @@
 package snake;
 
 import javafx.scene.Node;
+import javafx.scene.paint.Color;
 import snake.utilities.Object;
 
 /**
@@ -9,7 +10,13 @@ import snake.utilities.Object;
  * gmalinowski@protonmail.com
  */
 class Tile extends Object {
-    Tile(Node object, double x, double y) {
+    private Color color;
+    Tile(Node object, double x, double y, Color color) {
         super(object, x, y);
+        this.color = color;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

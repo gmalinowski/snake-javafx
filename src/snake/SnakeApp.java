@@ -28,8 +28,8 @@ public class SnakeApp extends Application {
     private Pane root;
     private Scene scene;
     private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
-    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.YELLOWGREEN, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
-    private Food food = new Food(25, Color.RED, 0, 0);
+    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.GREENYELLOW.brighter(), Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Food food = new Food(25, Color.TOMATO, 0, 0);
     private int counter = 0, counterReset = 7;
     private Direction direction = UP;
     private int moveOffSet = 25;
@@ -65,11 +65,26 @@ public class SnakeApp extends Application {
             counter = 0;
             move(direction, moveOffSet);
 
-            if (snake.isColliding(food))
-                root.getChildren().add(snake.generateTile().getNode());
+            if (snake.isColliding(food)) {
+                if (snake.size() % 2 == 0)
+                    root.getChildren().add(snake.generateTile(snake.getTailColor().brighter()).getNode());
+                else
+                    root.getChildren().add(snake.generateTile().getNode());
+            }
 
+            int newFoodCounter = 0;
             while (snake.isColliding(food)) {
+                newFoodCounter++;
                 food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
+                if (newFoodCounter > 10000) {
+                    System.exit(0);
+                    System.err.println("Couldn't generate new food tile.");
+                }
+            }
+
+            if (snake.isHeadCollidingWithTail()) {
+                System.err.println("Game Over");
+                System.exit(0);
             }
 
         }
