@@ -20,6 +20,7 @@ public class Head extends Object {
         border = borderSize;
     }
 
+
     @Override
     public void move(int xOffSet, int yOffSet) {
         if (border != null) {//TODO naprawic przechodzenie przez sciany

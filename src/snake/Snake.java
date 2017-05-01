@@ -5,8 +5,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
@@ -31,6 +34,8 @@ public class Snake {
 
     Snake(int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
+        head.getNode().setId("head");
+
         if (border != null) head.setBorder(border);
 
         this.tileSize = tileSize;
@@ -40,6 +45,13 @@ public class Snake {
         }
 
     }
+
+    void setImgAsHead(String imgSrc) {
+        ((Rectangle) head.getNode()).setFill(new ImagePattern(
+                new Image(imgSrc), 0, 0, 1, 1, true
+        ));
+    }
+
 
     Pane addToScene(Pane pane) {
         pane.getChildren().add(head.getNode());
@@ -70,7 +82,13 @@ public class Snake {
     }
 
     Tile generateTile(Color color) {
-        Rectangle last = (Rectangle) tail.get(tail.size() - 1).getNode();
+        Rectangle last;
+        if (tail.size() > 0)
+            last = (Rectangle) tail.get(tail.size() - 1).getNode();
+        else
+            last = ((Rectangle) head.getNode());
+
+
         Rectangle newRect = new Rectangle(tileSize, tileSize, color);
         Tile tile = new Tile(newRect, last.getTranslateX(), last.getTranslateY(), color);
         tail.add(tile);
@@ -88,6 +106,7 @@ public class Snake {
     }
 
     boolean isHeadCollidingWithTail() {
+        if (tail.size() < 4) return false;
         return tail.stream().anyMatch(tile -> tile.isColliding(head));
     }
 
@@ -96,7 +115,7 @@ public class Snake {
     }
 
     Color getTailColor() {
-        return tail.get(0).getColor();
+        return tailColor;
     }
 
     Point2D getHeadPosition() {

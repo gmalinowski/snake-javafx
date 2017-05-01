@@ -12,12 +12,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.omg.PortableServer.POA;
 import snake.utilities.ChangeListenerMSG;
 import snake.utilities.Direction;
 
@@ -40,8 +37,13 @@ public class SnakeApp extends Application {
     private Pane root;
     private Scene scene;
     private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
-    private Snake snake = new Snake(25, 300, 300 , 25, 3, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Snake snake = new Snake(25, 300, 300 , 25, 0, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
     private Food food = new Food(25, Color.ORANGE, 0, 0);
+    private String snakeImgU = "snake/img/head/Square/snakeU.png";
+    private String snakeImgR = "snake/img/head/Square/snakeR.png";
+    private String snakeImgD = "snake/img/head/Square/snakeD.png";
+    private String snakeImgL = "snake/img/head/Square/snakeL.png";
+
     private int counter = 0, counterReset = 8;
     private Direction direction = UP;
     private int moveOffSet = 25;
@@ -52,7 +54,7 @@ public class SnakeApp extends Application {
     private int points = 0;
     private int foodPrice = 14 - counterReset;
     private Label pointsLbl = new Label("Score: " + Integer.toString(points));
-    private Label bestScoreLbl = new Label("Best: " + Integer.toString(bestScore));
+    private Label bestScoreLbl = new Label("/" + Integer.toString(bestScore));
 
     private boolean scoreBlinking = true;
 
@@ -62,7 +64,6 @@ public class SnakeApp extends Application {
 
         root = new Pane();
         root.setPrefSize(width, height);
-
         root.getChildren().addAll(labelsBox);
 
         ////////////////////////////////////////////////////////////////    LABELS
@@ -71,14 +72,17 @@ public class SnakeApp extends Application {
         pointsLbl.setId("pointsLbl");
         bestScoreLbl.setId("bestScoreLbl");
 
-        HBox.setMargin(bestScoreLbl, new Insets(0, 0, 0, 25));
+//        HBox.setMargin(bestScoreLbl, new Insets(0, 0, 0, 25));
         labelsBox.getChildren().addAll(pointsLbl, bestScoreLbl);
-        labelsBox.setPadding(new Insets(5, 20, 0, 5));
+
+
 
 
 //        root.getChildren().addAll(pointsLbl, bestScoreLbl);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
         food.newRandomFoodPosition(new Point2D(width, height));
+        setRandomFoodImg();
+        snake.setImgAsHead(snakeImgU);
         root = food.addToScene(root);
         root = snake.addToScene(root);
 
@@ -102,6 +106,7 @@ public class SnakeApp extends Application {
         counter++;//todo zamienic na mierzenie czasu, aby snake poruszal sie caly czas ze zblizona predkoscia
         if (counter == counterReset) {
             counter = 0;
+
             move(direction, moveOffSet);
 
             if (snake.isColliding(food)) {
@@ -115,17 +120,26 @@ public class SnakeApp extends Application {
                     root.getChildren().add(snake.generateTile().getNode());
                 else
                     root.getChildren().add(snake.generateTile(snake.getTailColor().darker()).getNode());
+
+                int newFoodCounter = 0;
+                while (snake.isColliding(food)) {
+                    newFoodCounter++;
+                    food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
+                    if (newFoodCounter > 10000) {
+                        System.err.println("Couldn't generate new food tile.");
+                        Platform.exit();
+                    }
+                }
+
+                setRandomFoodImg();
+
             }
+
+
 
             // LABEL ANIMATION
             if (points > bestScore && scoreBlinking) {
                 scoreBlinking = false;
-//                if (pointsLbl.getTextFill() != Color.WHITE)
-//                    pointsLbl.setTextFill(Color.WHITE);
-//                else
-//                    pointsLbl.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
-
-
                 Runnable r = () -> {
                     Timeline timeline = new Timeline(
                             new KeyFrame(Duration.seconds(0.4), evt -> pointsLbl.setVisible(false)),
@@ -140,18 +154,6 @@ public class SnakeApp extends Application {
 
                 Thread t = new Thread(r);
                 t.run();
-
-
-            }
-
-            int newFoodCounter = 0;
-            while (snake.isColliding(food)) {
-                newFoodCounter++;
-                food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
-                if (newFoodCounter > 10000) {
-                    System.err.println("Couldn't generate new food tile.");
-                    Platform.exit();
-                }
             }
 
             if (snake.isHeadCollidingWithTail()) {
@@ -160,6 +162,13 @@ public class SnakeApp extends Application {
 
         }
 
+    }
+
+
+    private void setRandomFoodImg() {
+        Random gen = new Random();
+        String foodUrl = "snake/img/food/" + Integer.toString( gen.nextInt(3) + 1) + ".png";
+        food.setImageAsFood(foodUrl);
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////    MOVE
@@ -183,10 +192,22 @@ public class SnakeApp extends Application {
 /////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL
     private void setOnKeyPressed(KeyEvent event) {
         KeyCode code = event.getCode();//todo naprawic zabezpieczenie skrecania
-        if (KeyCode.RIGHT == event.getCode() && direction != LEFT) direction = RIGHT;
-        else if (KeyCode.DOWN == event.getCode() && direction != UP) direction = DOWN;
-        else if (KeyCode.LEFT == event.getCode() && direction != RIGHT) direction = LEFT;
-        else if (KeyCode.UP == event.getCode() && direction != DOWN) direction = UP;
+        if (KeyCode.RIGHT == event.getCode() && direction != LEFT) {
+            direction = RIGHT;
+            snake.setImgAsHead(snakeImgR);
+        }
+        else if (KeyCode.DOWN == event.getCode() && direction != UP) {
+            direction = DOWN;
+            snake.setImgAsHead(snakeImgD);
+        }
+        else if (KeyCode.LEFT == event.getCode() && direction != RIGHT) {
+            direction = LEFT;
+            snake.setImgAsHead(snakeImgL);
+        }
+        else if (KeyCode.UP == event.getCode() && direction != DOWN) {
+            direction = UP;
+            snake.setImgAsHead(snakeImgU);
+        }
 
         if (KeyCode.ESCAPE == event.getCode()) {
             Platform.exit();

@@ -1,19 +1,33 @@
 .root {
     -fx-background-color: black;
+    -fx-background-image: url("img/background/dirt.jpg");
 }
 
 #labelsBox {
+    -fx-background-color: rgba(0, 0, 0, 0.5);
+    -fx-padding: 3, 0, 0, 3;
+
+}
+
+#head {
+
+}
+
+#food {
 
 }
 
 .label {
-    -fx-font-size: 150%;
+    -fx-font-size: 120%;
     -fx-text-fill: chartreuse;
+    -fx-alignment: center;
+    -fx-font-style: oblique;
+    -fx-font-weight: bold;
 }
 
 #bestScoreLbl {
-    -fx-text-fill: red;
-    -fx-alignment: baseline-right;
+    -fx-text-fill: rgb(255, 0, 0);
+    /*-fx-alignment: center;*/
 }
 
 #pointsLbl {

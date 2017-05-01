@@ -2,8 +2,10 @@ package snake;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
 
@@ -19,6 +21,12 @@ class Food extends Object {
 
     Food(int foodSize, Color foodColor, double initPosX, double initPosY) {
         super(new Rectangle(foodSize, foodSize, foodColor), initPosX, initPosY);
+    }
+
+    void setImageAsFood(String imageSrc) {
+        food.setFill(new ImagePattern(
+                new Image(imageSrc), 0, 0, 1, 1, true
+        ));
     }
 
     void setFoodPosition(double x, double y) {
