@@ -11,6 +11,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
 
+import java.awt.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,6 +97,16 @@ public class Snake {
 
     Color getTailColor() {
         return tail.get(0).getColor();
+    }
+
+    Point2D getHeadPosition() {
+        Point2D headPosition = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
+
+        return headPosition;
+    }
+
+    int getTailSize() {
+        return tail.size();
     }
 
 

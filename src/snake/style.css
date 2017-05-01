@@ -2,12 +2,20 @@
     -fx-background-color: black;
 }
 
+#labelsBox {
+
+}
+
 .label {
-    -fx-font-size: 200%;
+    -fx-font-size: 150%;
     -fx-text-fill: chartreuse;
 }
 
 #bestScoreLbl {
     -fx-text-fill: red;
+    -fx-alignment: baseline-right;
+}
+
+#pointsLbl {
 
 }

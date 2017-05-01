@@ -26,6 +26,8 @@ public class ChangeListenerMSG implements ChangeListener<Number> {
     public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
         snake.setHeadBorder(new Point2D(scene.getWidth(), scene.getHeight()));
 
+
+
         if (msgON) {
             System.out.println("Window width: " + scene.getWidth());
             System.out.println("Window height: " + scene.getWidth());

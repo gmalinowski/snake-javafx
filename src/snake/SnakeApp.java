@@ -1,17 +1,22 @@
 package snake;
 
-import javafx.animation.AnimationTimer;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.omg.PortableServer.POA;
 import snake.utilities.ChangeListenerMSG;
 import snake.utilities.Direction;
@@ -42,11 +47,14 @@ public class SnakeApp extends Application {
     private int moveOffSet = 25;
     private File scoreFile = new File("SnakeScore.txt");
 
+    private HBox labelsBox = new HBox();
     private int bestScore = new Integer(readBestScoreFromFile(scoreFile));
     private int points = 0;
     private int foodPrice = 14 - counterReset;
     private Label pointsLbl = new Label("Score: " + Integer.toString(points));
     private Label bestScoreLbl = new Label("Best: " + Integer.toString(bestScore));
+
+    private boolean scoreBlinking = true;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////    CREATE PANE - SCENE
@@ -54,11 +62,19 @@ public class SnakeApp extends Application {
 
         root = new Pane();
         root.setPrefSize(width, height);
+
+        root.getChildren().addAll(labelsBox);
+
+        ////////////////////////////////////////////////////////////////    LABELS
+//        labelsBox.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
+        labelsBox.setId("labelsBox");
+        pointsLbl.setId("pointsLbl");
         bestScoreLbl.setId("bestScoreLbl");
-        bestScoreLbl.setTranslateX(pointsLbl.getWidth() + 10);//todo cos tu nie gra
-        Pane labelsPane = new Pane();
-        labelsPane.getChildren().addAll(pointsLbl, bestScoreLbl);
-        root.getChildren().addAll(labelsPane);
+
+        HBox.setMargin(bestScoreLbl, new Insets(0, 0, 0, 25));
+        labelsBox.getChildren().addAll(pointsLbl, bestScoreLbl);
+        labelsBox.setPadding(new Insets(5, 20, 0, 5));
+
 
 //        root.getChildren().addAll(pointsLbl, bestScoreLbl);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
@@ -91,7 +107,6 @@ public class SnakeApp extends Application {
             if (snake.isColliding(food)) {
                 points += foodPrice;
                 pointsLbl.setText("Score: " + Integer.toString(points));
-                bestScoreLbl.setTranslateX(pointsLbl.getWidth() + 10);
 
                 double rand = Math.random();
                 if (rand < 0.33)
@@ -100,6 +115,33 @@ public class SnakeApp extends Application {
                     root.getChildren().add(snake.generateTile().getNode());
                 else
                     root.getChildren().add(snake.generateTile(snake.getTailColor().darker()).getNode());
+            }
+
+            // LABEL ANIMATION
+            if (points > bestScore && scoreBlinking) {
+                scoreBlinking = false;
+//                if (pointsLbl.getTextFill() != Color.WHITE)
+//                    pointsLbl.setTextFill(Color.WHITE);
+//                else
+//                    pointsLbl.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
+
+
+                Runnable r = () -> {
+                    Timeline timeline = new Timeline(
+                            new KeyFrame(Duration.seconds(0.4), evt -> pointsLbl.setVisible(false)),
+                            new KeyFrame(Duration.seconds(0.6), evt -> pointsLbl.setVisible(true))
+//                            new KeyFrame(Duration.seconds(0.8), evt -> pointsLbl.setVisible(false)),
+//                            new KeyFrame(Duration.seconds(0.85), evt -> pointsLbl.setVisible(true))
+                    );
+
+                    timeline.setCycleCount(Animation.INDEFINITE);
+                    timeline.play();
+                };
+
+                Thread t = new Thread(r);
+                t.run();
+
+
             }
 
             int newFoodCounter = 0;
@@ -205,6 +247,15 @@ public class SnakeApp extends Application {
     public void stop() throws Exception {
         super.stop();
         System.out.println("Game Over");
+
+        ///////////////////////////////////     ZAPIS STANU GRY
+        Point2D headPosition = snake.getHeadPosition();
+        Point2D foodPosition = new Point2D(food.getNode().getTranslateX(), food.getNode().getTranslateY());
+        int tailLength = snake.getTailSize();
+
+        //todo save to json
+
+
         if (points > bestScore) {
             saveToFile(Integer.toString(points), scoreFile);
         }
