@@ -46,6 +46,10 @@ public class Snake {
 
     }
 
+    public int getTileSize() {
+        return tileSize;
+    }
+
     void setImgAsHead(String imgSrc) {
         ((Rectangle) head.getNode()).setFill(new ImagePattern(
                 new Image(imgSrc), 0, 0, 1, 1, true
@@ -100,6 +104,10 @@ public class Snake {
         head.setBorder(point);
     }
 
+    public Point2D getHeadBorder() {
+        return head.getBorder();
+    }
+
     boolean isColliding(Object other) {
         return tail.stream().anyMatch(tile -> tile.isColliding(other)) ||
                 head.isColliding(other);
@@ -129,5 +137,4 @@ public class Snake {
     }
 
 
-    //TODO czy head is cooliding with tail
 }

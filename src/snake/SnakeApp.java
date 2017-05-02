@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import snake.utilities.ChangeListenerMSG;
@@ -20,6 +21,7 @@ import snake.utilities.Direction;
 
 import java.io.*;
 import java.lang.*;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -33,20 +35,22 @@ import static snake.utilities.Direction.*;
  * gmalinowski@protonmail.com
  */
 public class SnakeApp extends Application {
-    private int width = 600, height = 600;
+    private int width = 960, height = 640;
+    private int elementsSize = 64;
     private Pane root;
     private Scene scene;
-    private Point2D snakeBorder = new Point2D(600, 600); // if null then snake can go over the screen
-    private Snake snake = new Snake(25, 300, 300 , 25, 0, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
-    private Food food = new Food(25, Color.ORANGE, 0, 0);
+    private Stage stage;
+    private Point2D snakeBorder = new Point2D(width, height); // if null then snake can go over the screen
+    private Snake snake = new Snake(elementsSize, 320, 320 , elementsSize, 0, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Food food = new Food(elementsSize, Color.ORANGE, 0, 0);
     private String snakeImgU = "snake/img/head/Square/snakeU.png";
     private String snakeImgR = "snake/img/head/Square/snakeR.png";
     private String snakeImgD = "snake/img/head/Square/snakeD.png";
     private String snakeImgL = "snake/img/head/Square/snakeL.png";
 
-    private int counter = 0, counterReset = 8;
+    private int counter = 0, counterReset = 11;
     private Direction direction = UP;
-    private int moveOffSet = 25;
+    private int moveOffSet = elementsSize;
     private File scoreFile = new File("SnakeScore.txt");
 
     private HBox labelsBox = new HBox();
@@ -57,6 +61,7 @@ public class SnakeApp extends Application {
     private Label bestScoreLbl = new Label("/" + Integer.toString(bestScore));
 
     private boolean scoreBlinking = true;
+    private boolean fullScreen = false;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////    CREATE PANE - SCENE
@@ -80,8 +85,8 @@ public class SnakeApp extends Application {
 
 //        root.getChildren().addAll(pointsLbl, bestScoreLbl);
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
-        food.newRandomFoodPosition(new Point2D(width, height));
         setRandomFoodImg();
+        food.newRandomFoodPosition(snakeBorder);
         snake.setImgAsHead(snakeImgU);
         root = food.addToScene(root);
         root = snake.addToScene(root);
@@ -124,7 +129,7 @@ public class SnakeApp extends Application {
                 int newFoodCounter = 0;
                 while (snake.isColliding(food)) {
                     newFoodCounter++;
-                    food.newRandomFoodPosition(new Point2D(scene.getWidth(), scene.getHeight()));
+                    food.newRandomFoodPosition(new Point2D(snake.getHeadBorder().getX(), snake.getHeadBorder().getY()));
                     if (newFoodCounter > 10000) {
                         System.err.println("Couldn't generate new food tile.");
                         Platform.exit();
@@ -133,9 +138,21 @@ public class SnakeApp extends Application {
 
                 setRandomFoodImg();
 
+                Runnable r = () -> {
+                    Timeline timeline = new Timeline(
+
+                            new KeyFrame(Duration.seconds(0.2), evt -> food.getNode().setVisible(false)),
+                            new KeyFrame(Duration.seconds(0.4), evt -> food.getNode().setVisible(true))
+                    );
+                    timeline.setCycleCount(5);
+                    timeline.play();
+                };
+                Thread t = new Thread(r);
+                t.run();
+
             }
 
-
+//todo jedzenie po ilus sekundach znika, im szybciej zlapiesz tym wiecej punktow dostaniesz
 
             // LABEL ANIMATION
             if (points > bestScore && scoreBlinking) {
@@ -189,28 +206,37 @@ public class SnakeApp extends Application {
         }
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL
+/////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL - on key pressed
     private void setOnKeyPressed(KeyEvent event) {
         KeyCode code = event.getCode();//todo naprawic zabezpieczenie skrecania
-        if (KeyCode.RIGHT == event.getCode() && direction != LEFT) {
+        if (KeyCode.RIGHT == code && direction != LEFT) {
             direction = RIGHT;
             snake.setImgAsHead(snakeImgR);
         }
-        else if (KeyCode.DOWN == event.getCode() && direction != UP) {
+        else if (KeyCode.DOWN == code && direction != UP) {
             direction = DOWN;
             snake.setImgAsHead(snakeImgD);
         }
-        else if (KeyCode.LEFT == event.getCode() && direction != RIGHT) {
+        else if (KeyCode.LEFT == code && direction != RIGHT) {
             direction = LEFT;
             snake.setImgAsHead(snakeImgL);
         }
-        else if (KeyCode.UP == event.getCode() && direction != DOWN) {
+        else if (KeyCode.UP == code && direction != DOWN) {
             direction = UP;
             snake.setImgAsHead(snakeImgU);
         }
 
-        if (KeyCode.ESCAPE == event.getCode()) {
+        if (KeyCode.ESCAPE == code) {
             Platform.exit();
+        }
+        if (KeyCode.F11 == code) {
+            if (fullScreen) {
+                fullScreen = false;
+                stage.setFullScreen(false);
+            } else {
+                fullScreen = true;
+                stage.setFullScreen(true);
+            }
         }
     }
 
@@ -253,15 +279,19 @@ public class SnakeApp extends Application {
         scene = createScene();
         scene.setOnKeyPressed(this::setOnKeyPressed);
         /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE
-        if (snakeBorder != null) {//TODO okno zmienia rozmiar o wielokrotnosc jedzenia/snake
+        if (snakeBorder != null) {
             ChangeListenerMSG windowListener = new ChangeListenerMSG(snake, scene, true);
-            scene.widthProperty().addListener(windowListener);
-            scene.heightProperty().addListener(windowListener);
+            primaryStage.widthProperty().addListener(windowListener);
+            primaryStage.heightProperty().addListener(windowListener);
         }
 
         primaryStage.setScene(scene);
         primaryStage.setAlwaysOnTop(true);
+        primaryStage.setFullScreen(fullScreen);
+        primaryStage.setTitle("Snake");
+        stage = primaryStage;
         primaryStage.show();
+//        primaryStage.setResizable(false);
     }
 
     @Override

@@ -4,6 +4,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 import snake.Snake;
 
 /**
@@ -24,13 +25,23 @@ public class ChangeListenerMSG implements ChangeListener<Number> {
 
     @Override
     public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-        snake.setHeadBorder(new Point2D(scene.getWidth(), scene.getHeight()));
+        double width, height;
+        int tmp;
+        tmp = ((int) scene.getWidth()) / snake.getTileSize();
+        width = tmp * snake.getTileSize();
+
+        tmp = ((int) scene.getHeight()) / snake.getTileSize();
+        height = tmp * snake.getTileSize();
 
 
+        snake.setHeadBorder(new Point2D(width, height));
+
+//        scene.setWidth(width);
+//        scene.setHeight(height);
 
         if (msgON) {
-            System.out.println("Window width: " + scene.getWidth());
-            System.out.println("Window height: " + scene.getWidth());
+            System.out.println("Window width: " + scene.getWidth() + " border: " + width);
+            System.out.println("Window height: " + scene.getHeight() + " border: " + height);
         }
     }
 

@@ -37,13 +37,15 @@ class Food extends Object {
     void newRandomFoodPosition(Point2D borderSize) {
         Random generator = new Random();
         double x = generator.nextInt(10000) * food.getWidth();
-        x %= borderSize.getX() - food.getWidth();
+        x %= (borderSize.getX() - food.getWidth());
 
         double y = generator.nextInt(10000) * food.getHeight();
-        y %= borderSize.getY();
+        y %= (borderSize.getY() - food.getHeight());
 
         food.setTranslateX(x);
         food.setTranslateY(y);
+
+        System.out.println("food x y: " + x + " " + y);
     }
 
     Pane addToScene(Pane pane) {

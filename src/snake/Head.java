@@ -20,6 +20,9 @@ public class Head extends Object {
         border = borderSize;
     }
 
+    Point2D getBorder() {
+        return border;
+    }
 
     @Override
     public void move(int xOffSet, int yOffSet) {
