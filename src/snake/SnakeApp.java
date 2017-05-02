@@ -269,8 +269,10 @@ public class SnakeApp extends Application {
 
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Can't read file... but it's not a problem.");
+            return "0";
         }
-        return "";
+
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
