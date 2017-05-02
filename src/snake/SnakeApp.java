@@ -3,6 +3,7 @@ package snake;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -40,16 +41,15 @@ public class SnakeApp extends Application {
     private Stage stage;
     private Point2D snakeBorder = new Point2D(width, height); // if null then snake can go over the screen
     private Snake snake = new Snake(elementsSize, 320, 320 , elementsSize, 0, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
-    private Food food = new Food(elementsSize, Color.ORANGE, 0, 0);
+    private Food food = new Food(elementsSize, Color.ORANGE, 0, 0, 15);
     private String snakeImgU = "snake/img/head/Square/snakeU.png";
     private String snakeImgR = "snake/img/head/Square/snakeR.png";
     private String snakeImgD = "snake/img/head/Square/snakeD.png";
     private String snakeImgL = "snake/img/head/Square/snakeL.png";
 
 
-    private int setFps = 6; // Frame per second (60fps / setFps -> 60fps/10 == 6 fps)
+    private int setFps = 10; // Frame per second (60fps / setFps -> 60fps/10 == 6 fps)
     private int frameCounter = 0;
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
     private Direction direction = UP;
     private int moveOffSet = elementsSize;
     private File scoreFile = new File("SnakeScore.txt");
@@ -57,9 +57,12 @@ public class SnakeApp extends Application {
     private HBox labelsBox = new HBox();
     private int bestScore = new Integer(readBestScoreFromFile(scoreFile));
     private int points = 0;
-    private int foodPrice = (15 - setFps);
+    private int foodSpeedBonus = setFps > 15 ? 0 : 15 - setFps;
     private Label pointsLbl = new Label("Score: " + Integer.toString(points));
     private Label bestScoreLbl = new Label("/" + Integer.toString(bestScore));
+    private Label foodTimeLbl = new Label(Integer.toString(food.getPrice()));
+    private Label speedBonusLbl = new Label("Price: " + Integer.toString(foodSpeedBonus) + " + ");
+    private Timeline foodTimeline = new Timeline();
 
     private boolean scoreBlinking = true;
     private boolean fullScreen = false;
@@ -77,9 +80,12 @@ public class SnakeApp extends Application {
         labelsBox.setId("labelsBox");
         pointsLbl.setId("pointsLbl");
         bestScoreLbl.setId("bestScoreLbl");
+        foodTimeLbl.setId("foodTimeLbl");
+        speedBonusLbl.setId("speedBonusLbl");
 
-//        HBox.setMargin(bestScoreLbl, new Insets(0, 0, 0, 25));
-        labelsBox.getChildren().addAll(pointsLbl, bestScoreLbl);
+//        HBox.setMargin(foodTimeLbl, new Insets(0, 0, 0, 25));
+        HBox.setMargin(speedBonusLbl, new Insets(0, 0, 0, 25));
+        labelsBox.getChildren().addAll(pointsLbl, bestScoreLbl, speedBonusLbl, foodTimeLbl);
 
 
 
@@ -115,7 +121,7 @@ public class SnakeApp extends Application {
     //////////////////  ANIMATION FUNCTIONS
     private void foodCollision() {
         if (snake.isColliding(food)) {
-            points += foodPrice;
+            points += foodSpeedBonus + food.getPrice();
             pointsLbl.setText("Score: " + Integer.toString(points));
 
                 double rand = Math.random();
@@ -137,6 +143,18 @@ public class SnakeApp extends Application {
                     }
                 }
 
+                foodTimeline.stop();
+                food.resetPrice();
+                foodTimeLbl.setText(Integer.toString(food.getPrice()));
+                foodTimeline = new Timeline(
+                        new KeyFrame(Duration.seconds(0)),
+                        new KeyFrame(Duration.seconds(1), event -> {
+                            food.setPrice(food.getPrice() - 1);
+                            foodTimeLbl.setText(Integer.toString(food.getPrice()));
+                        }
+                        ));
+                foodTimeline.setCycleCount(15);
+                foodTimeline.play();
                 setRandomFoodImg();
                 Timeline timeline = new Timeline(
                         new KeyFrame(Duration.seconds(0.2), evt -> food.getNode().setVisible(false)),
@@ -155,7 +173,6 @@ public class SnakeApp extends Application {
     }
 
     private void pointsLblBlinking() {
-//todo jedzenie po ilus sekundach znika, im szybciej zlapiesz tym wiecej punktow dostaniesz
             if (points > bestScore && scoreBlinking) {
                 scoreBlinking = false;
 
@@ -288,7 +305,7 @@ public class SnakeApp extends Application {
     public void stop() throws Exception {
         super.stop();
         System.out.println("Game Over");
-        executor.shutdown();
+
         ///////////////////////////////////     ZAPIS STANU GRY
         Point2D headPosition = snake.getHeadPosition();
         Point2D foodPosition = new Point2D(food.getNode().getTranslateX(), food.getNode().getTranslateY());

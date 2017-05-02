@@ -17,16 +17,34 @@ import java.util.Random;
  * gmalinowski@protonmail.com
  */
 class Food extends Object {
+    private final int pricef;
+    private int price;
+
+
     private Rectangle food = ((Rectangle) super.getNode());
 
-    Food(int foodSize, Color foodColor, double initPosX, double initPosY) {
+    Food(int foodSize, Color foodColor, double initPosX, double initPosY, int price) {
         super(new Rectangle(foodSize, foodSize, foodColor), initPosX, initPosY);
+        this.price = price;
+        this.pricef = price;
     }
 
     void setImageAsFood(String imageSrc) {
         food.setFill(new ImagePattern(
                 new Image(imageSrc), 0, 0, 1, 1, true
         ));
+    }
+
+    void resetPrice() {
+        price = pricef;
+    }
+
+    int getPrice() {
+        return price;
+    }
+
+    void setPrice(int price) {
+        this.price = price;
     }
 
     void setFoodPosition(double x, double y) {
