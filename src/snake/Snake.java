@@ -11,6 +11,7 @@ import snake.utilities.Object;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * javaFXtut
@@ -26,6 +27,7 @@ public class Snake {
     private int tileSize;
     private Color tailColor;
     private boolean setMoveLock = true;
+    String [] haedImgs = new String[4];
 
     Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
@@ -33,7 +35,10 @@ public class Snake {
         this.currentDirection = currentDirection;
         this.xOffSet = xOffSet;
         this.yOffSet = yOffSet;
-
+        haedImgs[0] = "snake/img/head/Square/snakeU.png";
+        haedImgs[1] = "snake/img/head/Square/snakeR.png";
+        haedImgs[2] = "snake/img/head/Square/snakeD.png";
+        haedImgs[3] = "snake/img/head/Square/snakeL.png";
         if (border != null) head.setBorder(border);
 
         this.tileSize = tileSize;
@@ -52,9 +57,18 @@ public class Snake {
         return tileSize;
     }
 
-    void setImgAsHead(String imgSrc) {
+    void setImgAsHead() {
+        int i = 0;
+        switch (currentDirection) {
+            case RIGHT: i = 1;
+            break;
+            case DOWN: i = 2;
+            break;
+            case LEFT: i = 3;
+            break;
+        }
         ((Rectangle) head.getNode()).setFill(new ImagePattern(
-                new Image(imgSrc), 0, 0, 1, 1, true
+                new Image(haedImgs[i]), 0, 0, 1, 1, true
         ));
     }
 
@@ -105,6 +119,7 @@ public class Snake {
         if (canMove(direction) && setMoveLock) {
             setMoveLock = false;
             this.currentDirection = direction;
+            setImgAsHead();
             this.xOffSet = ((int) translateOffset(offSet, direction).getX());
             this.yOffSet = ((int) translateOffset(offSet, direction).getY());
             return true;
@@ -113,13 +128,22 @@ public class Snake {
         return false;
     }
 
+    void setDirection(Direction direction) {
+        this.currentDirection = direction;
+        setImgAsHead();
+        int offSet = Math.max(Math.abs(yOffSet), Math.abs(xOffSet));
+
+        Point2D offset2 = translateOffset(offSet, direction);
+
+        this.xOffSet = ((int) offset2.getX());
+        this.yOffSet = ((int) offset2.getY());
+
+
+    }
+
     boolean setMove(Direction direction) {
         int offSet = Math.max(Math.abs(yOffSet), Math.abs(xOffSet));
         return setMove(offSet, direction);
-    }
-
-    void turboMove() {
-        move();
     }
 
     void move() {
@@ -137,11 +161,44 @@ public class Snake {
         }
     }
 
-    Tile generateTile() {
-        return generateTile(tailColor);
+    Direction getCurrentDirection() {
+        return currentDirection;
     }
 
-    Tile generateTile(Color color) {
+    double [] getTailXs() {
+        double [] x = new double[tail.size()];
+
+        for (int i = 0; i < tail.size(); i++)
+            x[i] = tail.get(i).getNode().getTranslateX();
+
+        return x;
+    }
+
+    double [] getTailYs() {
+        double [] y = new double[tail.size()];
+
+        for (int i = 0; i < tail.size(); i++)
+            y[i] = tail.get(i).getNode().getTranslateY();
+
+        return y;
+    }
+
+    void setTilePos(double x, double y, int tileIndex) {
+        tail.get(tileIndex).getNode().setTranslateX(x);
+        tail.get(tileIndex).getNode().setTranslateY(y);
+    }
+
+    Tile generateTile(boolean clearTail) {
+        double rand = Math.random();
+
+        if (rand < 0.33) return generateTile(tailColor.darker(), clearTail);
+        else if (rand < 0.66) return generateTile(tailColor, clearTail);
+        else return generateTile(tailColor.brighter(), clearTail);
+    }
+
+    Tile generateTile(Color color, boolean clearTail) {
+        if (clearTail) tail = new ArrayList<>();
+
         Rectangle last;
         if (tail.size() > 0)
             last = (Rectangle) tail.get(tail.size() - 1).getNode();
@@ -186,6 +243,11 @@ public class Snake {
         Point2D headPosition = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
 
         return headPosition;
+    }
+
+    void setHeadPosition(double x, double y) {
+        head.getNode().setTranslateX(x);
+        head.getNode().setTranslateY(y);
     }
 
     int getTailSize() {

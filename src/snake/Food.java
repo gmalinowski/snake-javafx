@@ -16,7 +16,7 @@ import java.util.Random;
  * Created by Grzegorz Malinowski on 2017-04-29, 19:45.
  * gmalinowski@protonmail.com
  */
-class Food extends Object {
+public class Food extends Object {
     private final int pricef;
     private int price;
 

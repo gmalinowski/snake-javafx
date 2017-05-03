@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="org.kie.modules:com-fasterxml-jackson:6.5.0.Final" type="repository">
+    <properties maven-id="org.kie.modules:com-fasterxml-jackson:6.5.0.Final" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.4.0/jackson-core-2.4.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-databind/2.4.0/jackson-databind-2.4.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.4.0/jackson-annotations-2.4.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

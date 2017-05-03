@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="snakefx:jar">
+    <output-path>$PROJECT_DIR$/</output-path>
+    <root id="archive" name="snakefx.jar">
+      <element id="module-output" name="snakefx" />
+    </root>
+  </artifact>
+</component>

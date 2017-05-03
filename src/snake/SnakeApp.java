@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import snake.utilities.ChangeListenerMSG;
 import snake.utilities.Direction;
+import snake.utilities.GameState;
 
 import java.io.*;
 import java.lang.*;
@@ -40,21 +41,17 @@ public class SnakeApp extends Application {
     private Point2D snakeBorder = new Point2D(width, height); // if null then snake can go over the screen
     private Snake snake = new Snake(elementsSize, 320, 320 , elementsSize, 0, Color.YELLOW, Color.GREEN, snakeBorder, Direction.UP); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
     private Food food = new Food(elementsSize, Color.ORANGE, 0, 0, 15);
-    private String snakeImgU = "snake/img/head/Square/snakeU.png";
-    private String snakeImgR = "snake/img/head/Square/snakeR.png";
-    private String snakeImgD = "snake/img/head/Square/snakeD.png";
-    private String snakeImgL = "snake/img/head/Square/snakeL.png";
 
-
-    private int setFps = 10; // Frame per second (60fps / setFps -> 60fps/10 == 6 fps)
+    private int setFps = 15; // Frame per second (60fps / setFps -> 60fps/10 == 6 fps)
     private int frameCounter = 0;
     private int moveOffSet = elementsSize;
     private File scoreFile = new File("SnakeScore.txt");
+    private String gameStateSrc = "snake.json";
 
     private HBox labelsBox = new HBox();
-    private int bestScore = new Integer(readBestScoreFromFile(scoreFile));
+    private int bestScore = 0;//new Integer(readBestScoreFromFile(scoreFile));
     private int points = 0;
-    private int foodSpeedBonus = setFps > 15 ? 0 : 15 - setFps;
+    private int foodSpeedBonus = 61 - setFps;
     private Label pointsLbl = new Label("Score: " + Integer.toString(points));
     private Label bestScoreLbl = new Label("/" + Integer.toString(bestScore));
     private Label foodTimeLbl = new Label(Integer.toString(food.getPrice()));
@@ -71,6 +68,7 @@ public class SnakeApp extends Application {
         root = new Pane();
         root.setPrefSize(width, height);
         root.getChildren().addAll(labelsBox);
+
 
         ////////////////////////////////////////////////////////////////    LABELS
 //        labelsBox.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
@@ -91,7 +89,6 @@ public class SnakeApp extends Application {
         root.getStylesheets().add(getClass().getResource("/snake/style.css").toExternalForm());
         setRandomFoodImg();
         food.newRandomFoodPosition(snakeBorder);
-        snake.setImgAsHead(snakeImgU);
         root = food.addToScene(root);
         root = snake.addToScene(root);
 
@@ -121,14 +118,7 @@ public class SnakeApp extends Application {
             points += foodSpeedBonus + food.getPrice();
             pointsLbl.setText("Score: " + Integer.toString(points));
 
-                double rand = Math.random();
-                if (rand < 0.33)
-                    root.getChildren().add(snake.generateTile(snake.getTailColor().brighter()).getNode());
-                else if (rand < 0.66)
-                    root.getChildren().add(snake.generateTile().getNode());
-                else
-                    root.getChildren().add(snake.generateTile(snake.getTailColor().darker()).getNode());
-
+                addTailTile(false);
 
                 int newFoodCounter = 0;
                 while (snake.isColliding(food)) {
@@ -140,18 +130,7 @@ public class SnakeApp extends Application {
                     }
                 }
 
-                foodTimeline.stop();
-                food.resetPrice();
-                foodTimeLbl.setText(Integer.toString(food.getPrice()));
-                foodTimeline = new Timeline(
-                        new KeyFrame(Duration.seconds(0)),
-                        new KeyFrame(Duration.seconds(1), event -> {
-                            food.setPrice(food.getPrice() - 1);
-                            foodTimeLbl.setText(Integer.toString(food.getPrice()));
-                        }
-                        ));
-                foodTimeline.setCycleCount(15);
-                foodTimeline.play();
+                pointsCountDown(true);
                 setRandomFoodImg();
                 Timeline timeline = new Timeline(
                         new KeyFrame(Duration.seconds(0.2), evt -> food.getNode().setVisible(false)),
@@ -162,6 +141,32 @@ public class SnakeApp extends Application {
         }
     }
 
+    private void pointsCountDown(boolean reset) {
+        foodTimeline.stop();
+        if (reset)
+        food.resetPrice();
+
+        foodTimeLbl.setText(Integer.toString(food.getPrice()));
+        foodTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(0)),
+                new KeyFrame(Duration.seconds(1), event -> {
+                    food.setPrice(food.getPrice() - 1);
+                    foodTimeLbl.setText(Integer.toString(food.getPrice()));
+                }
+                ));
+        foodTimeline.setCycleCount(food.getPrice());
+        foodTimeline.play();
+    }
+
+    private void addTailTile(boolean clearTail) {
+        double rand = Math.random();
+        if (rand < 0.33)
+            root.getChildren().add(snake.generateTile(snake.getTailColor().brighter(), clearTail).getNode());
+        else if (rand < 0.66)
+            root.getChildren().add(snake.generateTile(clearTail).getNode());
+        else
+            root.getChildren().add(snake.generateTile(snake.getTailColor().darker(), clearTail).getNode());
+    }
 
     private void tailCollision() {
         if (snake.isHeadCollidingWithTail()) {
@@ -190,28 +195,32 @@ public class SnakeApp extends Application {
         food.setImageAsFood(foodUrl);
     }
 
+    private void changeSpeed(int i) {
+        if (i > 0 && i < 61) {
+            setFps = i;
+            foodSpeedBonus = 61 -i;
+            speedBonusLbl.setText("Price: " + foodSpeedBonus + " + ");
+            frameCounter = 0;
+        }
+    }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL - on key pressed
     private void setOnKeyPressed(KeyEvent event) {
         KeyCode code = event.getCode();
 
-        if (KeyCode.RIGHT == code) {
-            if (snake.setMove(RIGHT))
-                snake.setImgAsHead(snakeImgR);
-        }
-        else if (KeyCode.DOWN == code) {
-            if (snake.setMove(DOWN))
-                snake.setImgAsHead(snakeImgD);
-        }
-        else if (KeyCode.LEFT == code) {
-            if (snake.setMove(LEFT))
-                snake.setImgAsHead(snakeImgL);
-        }
-        else if (KeyCode.UP == code) {
-            if (snake.setMove(UP))
-                snake.setImgAsHead(snakeImgU);
-        }
+        if (KeyCode.RIGHT == code) snake.setMove(RIGHT);
+        else if (KeyCode.DOWN == code) snake.setMove(DOWN);
+        else if (KeyCode.LEFT == code) snake.setMove(LEFT);
+        else if (KeyCode.UP == code) snake.setMove(UP);
 
-        if (KeyCode.SPACE == code) snake.turboMove();
+
+
+        if (KeyCode.SHIFT == code) {
+            changeSpeed(setFps + 1);
+        }
+        if (KeyCode.SPACE == code) {
+            changeSpeed(setFps - 1);
+        }
 
 
         if (KeyCode.ESCAPE == code) {
@@ -228,49 +237,52 @@ public class SnakeApp extends Application {
         }
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////    FILE - READ/WRITE
-    private void saveToFile(String msg, File file) {
+///////////////////////////////////////////////////////////////////////////////////////////////////     LOAD GAME STATE
+    private void loadLastGame() {
         try {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(file, true));
-            pw.println(msg);
-            pw.close ();
-        } catch (FileNotFoundException e) {
-//            if (new File(".conf/").mkdir()) {
-//                saveToFile(msg, file);
-//            } else {
-                e.printStackTrace();
-//            }
-        }
-    }
+            GameState gs = GameState.read(gameStateSrc);
+            bestScore = gs.getBestScore();
+            bestScoreLbl.setText("/" + gs.getBestScore());
+            if (!gs.isCollision()) {
 
-    private String readBestScoreFromFile(File file) {
-        try {
-            FileInputStream in = new FileInputStream(file);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                snake.setHeadPosition(gs.getHx(), gs.getHy());
+                snake.setDirection(gs.getDirection());
 
-            ArrayList<Integer> scores = new ArrayList<>();
+                if (gs.getTx().length > 0) {
+                    addTailTile(true);
+                    snake.setTilePos(gs.getTx()[0], gs.getTy()[0], 0);
 
-            String last = "0", tmp;
+                    for (int i = 1; i < gs.getTx().length; i++) {
+                        addTailTile(false);
+                        snake.setTilePos(gs.getTx()[i], gs.getTy()[i], i);
+                    }
+                }
 
-            while ((tmp = br.readLine()) != null) {
-                    last = tmp;
-                    scores.add(Integer.parseInt(tmp));
+
+                //for (int i = 0; i < gs.getTailLength(); i++) addTailTile();
+
+                food.getNode().setTranslateX(gs.getFx());
+                food.getNode().setTranslateY(gs.getFy());
+
+                food.setPrice(gs.getFoodTime());
+                foodTimeLbl.setText(gs.getFoodTime() + "");
+                points = gs.getPoints();
+                pointsLbl.setText("Score: " + points);
+
+                if (food.getPrice() > 0)
+                    pointsCountDown(false);
+
             }
-            in.close();
-            return scores.isEmpty() ? "0" : Collections.max(scores).toString();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Can't read file... but it's not a problem.");
-            return "0";
-        }
-
+            } catch(IOException e){
+                e.printStackTrace();
+            }
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
     @Override
     public void start(Stage primaryStage) throws Exception {
         scene = createScene();
+        loadLastGame();
         scene.setOnKeyPressed(this::setOnKeyPressed);
         /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE
         if (snakeBorder != null) {
@@ -293,17 +305,17 @@ public class SnakeApp extends Application {
         super.stop();
         System.err.println("Game Over");
 
-        ///////////////////////////////////     ZAPIS STANU GRY
-        Point2D headPosition = snake.getHeadPosition();
-        Point2D foodPosition = new Point2D(food.getNode().getTranslateX(), food.getNode().getTranslateY());
-        int tailLength = snake.getTailSize();
-
-        //todo save to json
-
-
-        if (points > bestScore) {
-            saveToFile(Integer.toString(points), scoreFile);
-        }
+/////////////////////////////////////////////////////////////////////////////////////////////     ZAPIS STANU GRY
+        if (points > bestScore) bestScore = points;
+        GameState.save(
+                "snake.json",snake.getHeadPosition().getX(), snake.getHeadPosition().getY() ,
+                food.getNode().getTranslateX(), food.getNode().getTranslateY(),
+                snake.getTailSize(), points, bestScore, food.getPrice(),
+                snake.getCurrentDirection(),
+                snake.getTailXs(), snake.getTailYs(),
+                snake.isHeadCollidingWithTail(),
+                setFps
+                );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////     MAIN

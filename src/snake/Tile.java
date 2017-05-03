@@ -9,7 +9,7 @@ import snake.utilities.Object;
  * Created by Grzegorz Malinowski on 2017-04-28, 21:48.
  * gmalinowski@protonmail.com
  */
-class Tile extends Object {
+public class Tile extends Object {
     private Color color;
     Tile(Node object, double x, double y, Color color) {
         super(object, x, y);
