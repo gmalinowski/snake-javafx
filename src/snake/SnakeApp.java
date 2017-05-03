@@ -40,7 +40,7 @@ public class SnakeApp extends Application {
     private Scene scene;
     private Stage stage;
     private Point2D snakeBorder = new Point2D(width, height); // if null then snake can go over the screen
-    private Snake snake = new Snake(elementsSize, 320, 320 , elementsSize, 0, Color.YELLOW, Color.GREEN, snakeBorder); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
+    private Snake snake = new Snake(elementsSize, 320, 320 , elementsSize, 0, Color.YELLOW, Color.GREEN, snakeBorder, Direction.UP); // IF LAST ARGUMENT (BORDER) == NULL THEN SNAKE CAN GO OVER THE WINDOW
     private Food food = new Food(elementsSize, Color.ORANGE, 0, 0, 15);
     private String snakeImgU = "snake/img/head/Square/snakeU.png";
     private String snakeImgR = "snake/img/head/Square/snakeR.png";
@@ -50,7 +50,6 @@ public class SnakeApp extends Application {
 
     private int setFps = 10; // Frame per second (60fps / setFps -> 60fps/10 == 6 fps)
     private int frameCounter = 0;
-    private Direction direction = UP;
     private int moveOffSet = elementsSize;
     private File scoreFile = new File("SnakeScore.txt");
 
@@ -106,7 +105,7 @@ public class SnakeApp extends Application {
                 frameCounter++;
                 if (frameCounter == setFps){
                     frameCounter = 0;
-                    move(direction, moveOffSet);
+                    snake.move();
                     foodCollision();
                     tailCollision();
                     pointsLblBlinking();
@@ -193,43 +192,27 @@ public class SnakeApp extends Application {
         food.setImageAsFood(foodUrl);
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////    MOVE
-    private void move(Direction direction, int offSet) {
-        switch (direction) {
-            case UP:
-                snake.move(0, -offSet);
-                break;
-            case RIGHT:
-                snake.move(offSet, 0);
-                break;
-            case DOWN:
-                snake.move(0, offSet);
-                break;
-            case LEFT:
-                snake.move(-offSet, 0);
-                break;
-        }
-    }
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL - on key pressed
-    private void setOnKeyPressed(KeyEvent event) {//todo przeniesc do klasy snake
+    private void setOnKeyPressed(KeyEvent event) {
         KeyCode code = event.getCode();//todo naprawic zabezpieczenie skrecania
-        if (KeyCode.RIGHT == code && direction != LEFT) {
-            direction = RIGHT;
-            snake.setImgAsHead(snakeImgR);
+
+        if (KeyCode.RIGHT == code) {
+            if (snake.changeMove(moveOffSet, RIGHT))
+                snake.setImgAsHead(snakeImgR);
         }
-        else if (KeyCode.DOWN == code && direction != UP) {
-            direction = DOWN;
-            snake.setImgAsHead(snakeImgD);
+        else if (KeyCode.DOWN == code) {
+            if (snake.changeMove(moveOffSet, DOWN))
+                snake.setImgAsHead(snakeImgD);
         }
-        else if (KeyCode.LEFT == code && direction != RIGHT) {
-            direction = LEFT;
-            snake.setImgAsHead(snakeImgL);
+        else if (KeyCode.LEFT == code) {
+            if (snake.changeMove(moveOffSet, LEFT))
+                snake.setImgAsHead(snakeImgL);
         }
-        else if (KeyCode.UP == code && direction != DOWN) {
-            direction = UP;
-            snake.setImgAsHead(snakeImgU);
+        else if (KeyCode.UP == code) {
+            if (snake.changeMove(moveOffSet, UP))
+                snake.setImgAsHead(snakeImgU);
         }
+
 
         if (KeyCode.ESCAPE == code) {
             Platform.exit();

@@ -1,23 +1,15 @@
 package snake;
 
-import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.image.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import snake.utilities.Direction;
 import snake.utilities.Object;
 
-import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,14 +19,19 @@ import java.util.List;
  */
 public class Snake {
     private Head head;
+    private Direction currentDirection;
+    private int xOffSet, yOffSet;
     private List<Tile> tail = new ArrayList<>();
 
     private int tileSize;
     private Color tailColor;
 
-    Snake(int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border) {
+    Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
         head.getNode().setId("head");
+        this.currentDirection = currentDirection;
+        this.xOffSet = xOffSet;
+        this.yOffSet = yOffSet;
 
         if (border != null) head.setBorder(border);
 
@@ -44,6 +41,10 @@ public class Snake {
             tail.add(new Tile(new Rectangle(tileSize, tileSize, tailColor), headPosX, ((headPosY+ tileSize) + i * tileSize), tailColor));
         }
 
+    }
+
+    Snake(int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
+        this(0, -headSize, headSize, headPosX, headPosY, tileSize, tailLength, headColor, tailColor, border, currentDirection);
     }
 
     public int getTileSize() {
@@ -67,7 +68,51 @@ public class Snake {
         return pane;
     }
 
-    void move(int xOffSet, int yOffSet) {
+    private boolean canMove(Direction direction) {
+        if (currentDirection == direction) return false;
+        if (currentDirection == Direction.UP && direction == Direction.DOWN) return false;
+        if (currentDirection == Direction.RIGHT && direction == Direction.LEFT) return false;
+        if (currentDirection == Direction.DOWN && direction == Direction.UP) return false;
+        if (currentDirection == Direction.LEFT && direction == Direction.RIGHT) return false;
+
+        return true;
+    }
+
+    private Point2D translateOffset(int offSet, Direction direction) {
+        int x = offSet, y = offSet;
+        System.out.println("ddd" + x + " " + y);
+        switch (direction) {
+            case UP:
+                y *= -1;
+                x = 0;
+                break;
+            case RIGHT:
+                y = 0;
+                break;
+            case DOWN:
+                x = 0;
+                break;
+            case LEFT:
+                x *= -1;
+                y = 0;
+                break;
+        }
+        System.out.println(x + " " + y);
+        return new Point2D(x, y);
+    }
+
+    boolean changeMove(int offSet, Direction direction) {
+        if (canMove(direction)) {
+            this.currentDirection = direction;
+            this.xOffSet = ((int) translateOffset(offSet, direction).getX());
+            this.yOffSet = ((int) translateOffset(offSet, direction).getY());
+            return true;
+        }
+
+        return false;
+    }
+
+    void move() {
         Point2D lastPos = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
         Point2D lastPos2;
         head.move(xOffSet, yOffSet);
