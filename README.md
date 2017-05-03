@@ -5,3 +5,4 @@
 ### Keyboard shortcuts
 * Esc - Exit
 * F11 - Full Screen
+* Space - Turbo

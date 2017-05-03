@@ -213,6 +213,8 @@ public class SnakeApp extends Application {
                 snake.setImgAsHead(snakeImgU);
         }
 
+        if (KeyCode.SPACE == code) snake.turboMove();
+
 
         if (KeyCode.ESCAPE == code) {
             Platform.exit();

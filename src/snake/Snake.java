@@ -25,6 +25,7 @@ public class Snake {
 
     private int tileSize;
     private Color tailColor;
+    private boolean canChangeDir = true;
 
     Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
@@ -103,6 +104,7 @@ public class Snake {
 
     boolean changeMove(int offSet, Direction direction) {
         if (canMove(direction)) {
+            canChangeDir = false;
             this.currentDirection = direction;
             this.xOffSet = ((int) translateOffset(offSet, direction).getX());
             this.yOffSet = ((int) translateOffset(offSet, direction).getY());
@@ -112,10 +114,15 @@ public class Snake {
         return false;
     }
 
+    void turboMove() {
+        move();
+    }
+
     void move() {
         Point2D lastPos = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
         Point2D lastPos2;
         head.move(xOffSet, yOffSet);
+        canChangeDir = true;
         for (int i = 0; i < tail.size(); i++) {
             lastPos2 = new Point2D(tail.get(i).getNode().getTranslateX(), tail.get(i).getNode().getTranslateY());
             tail.get(i).setCoordinates(lastPos);
