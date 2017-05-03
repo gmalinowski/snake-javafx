@@ -22,8 +22,6 @@ import java.lang.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static snake.utilities.Direction.*;
 
@@ -194,22 +192,22 @@ public class SnakeApp extends Application {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////    CONTROL - on key pressed
     private void setOnKeyPressed(KeyEvent event) {
-        KeyCode code = event.getCode();//todo naprawic zabezpieczenie skrecania
+        KeyCode code = event.getCode();
 
         if (KeyCode.RIGHT == code) {
-            if (snake.changeMove(moveOffSet, RIGHT))
+            if (snake.setMove(RIGHT))
                 snake.setImgAsHead(snakeImgR);
         }
         else if (KeyCode.DOWN == code) {
-            if (snake.changeMove(moveOffSet, DOWN))
+            if (snake.setMove(DOWN))
                 snake.setImgAsHead(snakeImgD);
         }
         else if (KeyCode.LEFT == code) {
-            if (snake.changeMove(moveOffSet, LEFT))
+            if (snake.setMove(LEFT))
                 snake.setImgAsHead(snakeImgL);
         }
         else if (KeyCode.UP == code) {
-            if (snake.changeMove(moveOffSet, UP))
+            if (snake.setMove(UP))
                 snake.setImgAsHead(snakeImgU);
         }
 
@@ -237,7 +235,11 @@ public class SnakeApp extends Application {
             pw.println(msg);
             pw.close ();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+//            if (new File(".conf/").mkdir()) {
+//                saveToFile(msg, file);
+//            } else {
+                e.printStackTrace();
+//            }
         }
     }
 
@@ -289,7 +291,7 @@ public class SnakeApp extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        System.out.println("Game Over");
+        System.err.println("Game Over");
 
         ///////////////////////////////////     ZAPIS STANU GRY
         Point2D headPosition = snake.getHeadPosition();

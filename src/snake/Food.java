@@ -62,8 +62,6 @@ class Food extends Object {
 
         food.setTranslateX(x);
         food.setTranslateY(y);
-
-        System.out.println("food x y: " + x + " " + y);
     }
 
     Pane addToScene(Pane pane) {

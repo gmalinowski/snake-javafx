@@ -25,7 +25,7 @@ public class Snake {
 
     private int tileSize;
     private Color tailColor;
-    private boolean canChangeDir = true;
+    private boolean setMoveLock = true;
 
     Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
@@ -74,14 +74,12 @@ public class Snake {
         if (currentDirection == Direction.UP && direction == Direction.DOWN) return false;
         if (currentDirection == Direction.RIGHT && direction == Direction.LEFT) return false;
         if (currentDirection == Direction.DOWN && direction == Direction.UP) return false;
-        if (currentDirection == Direction.LEFT && direction == Direction.RIGHT) return false;
 
-        return true;
+        return !(currentDirection == Direction.LEFT && direction == Direction.RIGHT);
     }
 
     private Point2D translateOffset(int offSet, Direction direction) {
         int x = offSet, y = offSet;
-        System.out.println("ddd" + x + " " + y);
         switch (direction) {
             case UP:
                 y *= -1;
@@ -98,13 +96,14 @@ public class Snake {
                 y = 0;
                 break;
         }
-        System.out.println(x + " " + y);
         return new Point2D(x, y);
     }
 
-    boolean changeMove(int offSet, Direction direction) {
-        if (canMove(direction)) {
-            canChangeDir = false;
+
+    boolean setMove(int offSet, Direction direction) {
+
+        if (canMove(direction) && setMoveLock) {
+            setMoveLock = false;
             this.currentDirection = direction;
             this.xOffSet = ((int) translateOffset(offSet, direction).getX());
             this.yOffSet = ((int) translateOffset(offSet, direction).getY());
@@ -112,6 +111,11 @@ public class Snake {
         }
 
         return false;
+    }
+
+    boolean setMove(Direction direction) {
+        int offSet = Math.max(Math.abs(yOffSet), Math.abs(xOffSet));
+        return setMove(offSet, direction);
     }
 
     void turboMove() {
@@ -122,7 +126,7 @@ public class Snake {
         Point2D lastPos = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
         Point2D lastPos2;
         head.move(xOffSet, yOffSet);
-        canChangeDir = true;
+        setMoveLock = true;
         for (int i = 0; i < tail.size(); i++) {
             lastPos2 = new Point2D(tail.get(i).getNode().getTranslateX(), tail.get(i).getNode().getTranslateY());
             tail.get(i).setCoordinates(lastPos);
