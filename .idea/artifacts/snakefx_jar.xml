@@ -3,6 +3,9 @@
     <output-path>$PROJECT_DIR$/</output-path>
     <root id="archive" name="snakefx.jar">
       <element id="module-output" name="snakefx" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-core/2.4.0/jackson-core-2.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-databind/2.4.0/jackson-databind-2.4.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.4.0/jackson-annotations-2.4.0.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>
