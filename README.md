@@ -8,7 +8,8 @@
 * F11 → Full Screen
 * Space   → Increase snake speed / food price
 * Shift → Decrease snake speed / food price
-### Change tail color
+
+##### Change tail color
 * 1 → Green
 * 2 → YellowGreen
 * 3 → Orange
