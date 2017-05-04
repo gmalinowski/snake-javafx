@@ -24,6 +24,7 @@
 .label {
     -fx-font-size: 150%;
     -fx-text-fill: chartreuse;
+    /*-fx-text-fill: ;*/
     -fx-alignment: center;
     -fx-font-style: oblique;
     -fx-font-weight: bold;

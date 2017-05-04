@@ -1,14 +1,16 @@
 package snake;
 
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
+import java.io.InputStream;
 import java.util.Random;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Random;
  * Created by Grzegorz Malinowski on 2017-04-29, 19:45.
  * gmalinowski@protonmail.com
  */
-public class Food extends Object {
+class Food extends Object {
     private final int pricef;
     private int price;
 
@@ -29,9 +31,24 @@ public class Food extends Object {
         this.pricef = price;
     }
 
-    void setImageAsFood(String imageSrc) {
+    void playSound() {
+        try
+        {
+            InputStream inputStream = getClass().getResourceAsStream("/snake/sound/beep.wav");
+            AudioStream audioStream = new AudioStream(inputStream);
+            AudioPlayer.player.start(audioStream);
+        }
+        catch (Exception e)
+        {
+            System.err.println(e.toString());
+        }
+    }
+
+    void newRandomFoodImg() {
+        Random gen = new Random();
+        String foodSrc = "snake/img/food/" + Integer.toString( gen.nextInt(3) + 1) + ".png";
         food.setFill(new ImagePattern(
-                new Image(imageSrc), 0, 0, 1, 1, true
+                new Image(foodSrc), 0, 0, 1, 1, true
         ));
     }
 

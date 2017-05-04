@@ -19,6 +19,7 @@ public class Object {
         object.setTranslateY(y);
     }
 
+
     public void move(int xOffSet, int yOffSet) {
         object.setTranslateX(object.getTranslateX() + xOffSet);
         object.setTranslateY(object.getTranslateY() + yOffSet);

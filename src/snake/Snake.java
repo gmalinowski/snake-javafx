@@ -11,7 +11,6 @@ import snake.utilities.Object;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * javaFXtut
@@ -27,9 +26,9 @@ public class Snake {
     private int tileSize;
     private Color tailColor;
     private boolean setMoveLock = true;
-    String [] haedImgs = new String[4];
+    private String [] haedImgs = new String[4];
 
-    Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
+    private Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
         head.getNode().setId("head");
         this.currentDirection = currentDirection;
@@ -58,7 +57,7 @@ public class Snake {
         return tileSize;
     }
 
-    void setImgAsHead() {
+    private void setImgAsHead() {
         int i = 0;
         switch (currentDirection) {
             case RIGHT: i = 1;
@@ -77,8 +76,18 @@ public class Snake {
     Pane addToScene(Pane pane) {
         pane.getChildren().add(head.getNode());
 
-        for (int i = 0; i < tail.size(); i++) {
-            pane.getChildren().add(tail.get(i).getNode());
+        for (Tile aTail : tail) {
+            pane.getChildren().add(aTail.getNode());
+        }
+
+        return pane;
+    }
+
+    Pane removeFromScene(Pane pane) {
+        pane.getChildren().remove(head.getNode());
+
+        for (Tile aTail : tail) {
+            pane.getChildren().remove(aTail.getNode());
         }
 
         return pane;
@@ -115,7 +124,7 @@ public class Snake {
     }
 
 
-    boolean setMove(int offSet, Direction direction) {
+    private boolean setMove(int offSet, Direction direction) {
 
         if (canMove(direction) && setMoveLock) {
             setMoveLock = false;
@@ -218,7 +227,7 @@ public class Snake {
         head.setBorder(point);
     }
 
-    public Point2D getHeadBorder() {
+    Point2D getHeadBorder() {
         return head.getBorder();
     }
 
@@ -228,8 +237,7 @@ public class Snake {
     }
 
     boolean isHeadCollidingWithTail() {
-        if (tail.size() < 4) return false;
-        return tail.stream().anyMatch(tile -> tile.isColliding(head));
+        return tail.size() >= 4 && tail.stream().anyMatch(tile -> tile.isColliding(head));
     }
 
     int size() {
@@ -240,10 +248,13 @@ public class Snake {
         return tailColor;
     }
 
-    Point2D getHeadPosition() {
-        Point2D headPosition = new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
+    void changeTailColor(Color color) {
+        tailColor = color;
+        tail.forEach(tile -> tile.setRandomeColor(color));
+    }
 
-        return headPosition;
+    Point2D getHeadPosition() {
+        return new Point2D(head.getNode().getTranslateX(), head.getNode().getTranslateY());
     }
 
     void setHeadPosition(double x, double y) {

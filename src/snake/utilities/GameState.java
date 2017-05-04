@@ -3,11 +3,9 @@ package snake.utilities;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import snake.Tile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * snake-javafx
@@ -17,15 +15,17 @@ import java.util.List;
 public class GameState {
     private double hx, hy, fx, fy;
     private int tailLength, points, foodTime, fps, bestScore;
+    private double [] rgb;
     private Direction direction;
     private double [] tx, ty;
     private boolean collision;
 
-    private GameState(double hx, double hy, double fx, double fy, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
+    private GameState(double hx, double hy, double fx, double fy, double[] rgb, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
         this.hx = hx;
         this.hy = hy;
         this.fx = fx;
         this.fy = fy;
+        this.rgb = rgb;
         this.foodTime = foodTime;
         this.tailLength = tailLength;
         this.points = points;
@@ -39,9 +39,9 @@ public class GameState {
     public GameState() {
 
     }
-//todo direction + tail position
-    public static void save(String fileSrc,double hx, double hy, double fx, double fy, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
-        GameState gameState = new GameState(hx, hy, fx, fy, tailLength, points, bestScore, foodTime, direction, tx, ty, collision, fps);
+
+    public static void save(String fileSrc,double hx, double hy, double fx, double fy, double[] rgb, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
+        GameState gameState = new GameState(hx, hy, fx, fy, rgb, tailLength, points, bestScore, foodTime, direction, tx, ty, collision, fps);
 
         ObjectMapper mapper = new ObjectMapper();
 ////        JEZELI NIE MA GETEROW I SETEROW TO TRZEBA USTAWIC ↓↓↓
@@ -51,6 +51,14 @@ public class GameState {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public double[] getRgb() {
+        return rgb;
+    }
+
+    public void setRgb(double[] rgb) {
+        this.rgb = rgb;
     }
 
     public int getBestScore() {
