@@ -39,6 +39,7 @@ public class Snake {
         haedImgs[1] = "snake/img/head/Square/snakeR.png";
         haedImgs[2] = "snake/img/head/Square/snakeD.png";
         haedImgs[3] = "snake/img/head/Square/snakeL.png";
+        setImgAsHead();
         if (border != null) head.setBorder(border);
 
         this.tileSize = tileSize;

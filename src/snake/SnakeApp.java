@@ -245,6 +245,8 @@ public class SnakeApp extends Application {
             bestScoreLbl.setText("/" + gs.getBestScore());
             if (!gs.isCollision()) {
 
+                changeSpeed(gs.getFps());
+
                 snake.setHeadPosition(gs.getHx(), gs.getHy());
                 snake.setDirection(gs.getDirection());
 
