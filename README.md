@@ -16,3 +16,5 @@
 * 4 → Blue
 * 5 → Black
 * 6 → Random
+
+### To play download the snakefx.jar
