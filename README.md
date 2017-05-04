@@ -8,6 +8,7 @@
 * F11 → Full Screen
 * Space   → Increase snake speed / food price
 * Shift → Decrease snake speed / food price
+
 ##### Change tail color
 * 1 → Green
 * 2 → YellowGreen
@@ -15,3 +16,5 @@
 * 4 → Blue
 * 5 → Black
 * 6 → Random
+
+### To play download the snakefx.jar
