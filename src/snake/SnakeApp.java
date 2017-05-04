@@ -193,7 +193,10 @@ public class SnakeApp extends Application {
 
     private void tailCollision() {
         if (snake.isHeadCollidingWithTail()) {
-            Platform.exit();
+            if (points > bestScore)
+                saveGameState();
+
+            cleanUP();
         }
     }
 
@@ -221,6 +224,16 @@ public class SnakeApp extends Application {
     }
 
     private void cleanUP() {
+        try {
+            loadLastGame(true);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
+        if (points > bestScore) {
+            bestScore = points;
+            bestScoreLbl.setText("/" + bestScore);
+        }
+
         points = 0;
         pointsLbl.setText("Score: " + points);
 
@@ -228,10 +241,14 @@ public class SnakeApp extends Application {
         foodTimeline.stop();
 
 //        generateFood();
-        if (!(newFoodTimelineBlink == null))
+        if (newFoodTimelineBlink != null)
             newFoodTimelineBlink.stop();
-        if ((pointsTimelineBlink == null))
+            food.getNode().setVisible(true);
+        if ((pointsTimelineBlink != null)) {
             pointsTimelineBlink.stop();
+            pointsLbl.setVisible(true);
+        }
+        scoreBlinking = true;
 
         changeSpeed(15);
 
@@ -296,11 +313,13 @@ public class SnakeApp extends Application {
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////     LOAD GAME STATE
-    private void loadLastGame() {
+    private void loadLastGame(boolean onlyBest) {
         try {
             GameState gs = GameState.read(gameStateSrc);
             bestScore = gs.getBestScore();
             bestScoreLbl.setText("/" + gs.getBestScore());
+            if (onlyBest) return;
+
             if (!gs.isCollision()) {
 
                 snake.changeTailColor(Color.color(gs.getRgb()[0], gs.getRgb()[1], gs.getRgb()[2]));
@@ -337,11 +356,32 @@ public class SnakeApp extends Application {
             }
     }
 
+    private void saveGameState() {
+        /////////////////////////////////////////////////////////////////////////////     ZAPIS STANU GRY - ON EXIT
+        if (points > bestScore) bestScore = points;
+
+        double[] rgb = new double[3];
+        rgb[0] = snake.getTailColor().getRed();
+        rgb[1] = snake.getTailColor().getGreen();
+        rgb[2] = snake.getTailColor().getBlue();
+
+        GameState.save(
+                "snake.json",snake.getHeadPosition().getX(), snake.getHeadPosition().getY(),
+                food.getNode().getTranslateX(), food.getNode().getTranslateY(),
+                rgb,
+                snake.getTailSize(), points, bestScore, food.getPrice(),
+                snake.getCurrentDirection(),
+                snake.getTailXs(), snake.getTailYs(),
+                snake.isHeadCollidingWithTail(),
+                setFps
+        );
+    }
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = createScene();
-        loadLastGame();
+        loadLastGame(false);
         scene.setOnKeyPressed(this::setOnKeyPressed);
         /////////////////////////////////////////////////////////////////   ON WINDOW CHANGE
         if (snakeBorder != null) {
@@ -364,23 +404,7 @@ public class SnakeApp extends Application {
         super.stop();
         System.err.println("Game Over");
 
-/////////////////////////////////////////////////////////////////////////////     ZAPIS STANU GRY - ON EXIT
-        if (points > bestScore) bestScore = points;
-        double[] rgb = new double[3];
-        rgb[0] = snake.getTailColor().getRed();
-        rgb[1] = snake.getTailColor().getGreen();
-        rgb[2] = snake.getTailColor().getBlue();
-
-        GameState.save(
-                "snake.json",snake.getHeadPosition().getX(), snake.getHeadPosition().getY(),
-                food.getNode().getTranslateX(), food.getNode().getTranslateY(),
-                rgb,
-                snake.getTailSize(), points, bestScore, food.getPrice(),
-                snake.getCurrentDirection(),
-                snake.getTailXs(), snake.getTailYs(),
-                snake.isHeadCollidingWithTail(),
-                setFps
-                );
+        saveGameState();
     }
 
     public static void main(String[] args) {
