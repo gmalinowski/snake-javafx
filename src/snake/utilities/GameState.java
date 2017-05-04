@@ -18,9 +18,12 @@ public class GameState {
     private double [] rgb;
     private Direction direction;
     private double [] tx, ty;
-    private boolean collision;
+    private double ww, wh;
+    private boolean collision, fullScreen, sound;
 
-    private GameState(double hx, double hy, double fx, double fy, double[] rgb, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
+    private GameState(double hx, double hy, double fx, double fy, double[] rgb,
+                      int tailLength, int points, int bestScore, int foodTime, Direction direction,
+                      double [] tx, double [] ty, boolean collision, int fps, double ww, double wh, boolean fullScreen, boolean sound) {
         this.hx = hx;
         this.hy = hy;
         this.fx = fx;
@@ -35,13 +38,20 @@ public class GameState {
         this.direction = direction;
         this.collision = collision;
         this.fps = fps;
+        this.ww = ww;
+        this.wh = wh;
+        this.fullScreen = fullScreen;
+        this.sound = sound;
     }
     public GameState() {
 
     }
 
-    public static void save(String fileSrc,double hx, double hy, double fx, double fy, double[] rgb, int tailLength, int points, int bestScore, int foodTime, Direction direction, double [] tx, double [] ty, boolean collision, int fps) {
-        GameState gameState = new GameState(hx, hy, fx, fy, rgb, tailLength, points, bestScore, foodTime, direction, tx, ty, collision, fps);
+    public static void save(String fileSrc,double hx, double hy, double fx, double fy, double[] rgb,
+                            int tailLength, int points, int bestScore, int foodTime, Direction direction,
+                            double [] tx, double [] ty, boolean collision, int fps, double ww, double wh, boolean fullScreen, boolean sound) {
+        GameState gameState = new GameState(hx, hy, fx, fy, rgb, tailLength, points, bestScore,
+                foodTime, direction, tx, ty, collision, fps, ww, wh, fullScreen, sound);
 
         ObjectMapper mapper = new ObjectMapper();
 ////        JEZELI NIE MA GETEROW I SETEROW TO TRZEBA USTAWIC ↓↓↓
@@ -51,6 +61,38 @@ public class GameState {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isSound() {
+        return sound;
+    }
+
+    public void setSound(boolean sound) {
+        this.sound = sound;
+    }
+
+    public double getWw() {
+        return ww;
+    }
+
+    public void setWw(double ww) {
+        this.ww = ww;
+    }
+
+    public double getWh() {
+        return wh;
+    }
+
+    public void setWh(double wh) {
+        this.wh = wh;
+    }
+
+    public boolean isFullScreen() {
+        return fullScreen;
+    }
+
+    public void setFullScreen(boolean fullScreen) {
+        this.fullScreen = fullScreen;
     }
 
     public double[] getRgb() {

@@ -10,8 +10,15 @@
 }
 
 #speedBonusLbl {
-    -fx-font-size: 100%;
+    -fx-font-size: 125%;
 }
+
+#helpLbl {
+    -fx-text-fill: darkorange;
+    -fx-font-size: 175%;
+    -fx-font-style: normal;
+}
+
 
 #head {
 
@@ -20,9 +27,12 @@
 #food {
 
 }
+#foodTimeLbl {
+
+}
 
 .label {
-    -fx-font-size: 150%;
+    -fx-font-size: 175%;
     -fx-text-fill: chartreuse;
     /*-fx-text-fill: ;*/
     -fx-alignment: center;

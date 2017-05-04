@@ -2,7 +2,10 @@ package snake;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.shape.Rectangle;
 import snake.utilities.Object;
+
+
 
 
 /**
@@ -22,6 +25,10 @@ public class Head extends Object {
 
     Point2D getBorder() {
         return border;
+    }
+
+    Rectangle getHead() {
+        return ((Rectangle) super.getNode());
     }
 
     @Override

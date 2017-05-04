@@ -28,7 +28,8 @@ public class Snake {
     private boolean setMoveLock = true;
     private String [] haedImgs = new String[4];
 
-    private Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength, Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
+    private Snake(int xOffSet, int yOffSet, int headSize, int headPosX, int headPosY, int tileSize, int tailLength,
+                  Color headColor, Color tailColor, Point2D border, Direction currentDirection) {
         head = new Head(new Rectangle(headSize, headSize, headColor), headPosX, headPosY);
         head.getNode().setId("head");
         this.currentDirection = currentDirection;

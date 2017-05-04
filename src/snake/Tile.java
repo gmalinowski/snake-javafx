@@ -17,6 +17,10 @@ class Tile extends Object {
         this.color = color;
     }
 
+    Rectangle getTile() {
+        return ((Rectangle) super.getNode());
+    }
+
     Color getColor() {
         return color;
     }

@@ -18,7 +18,7 @@ import java.util.Random;
  * Created by Grzegorz Malinowski on 2017-04-29, 19:45.
  * gmalinowski@protonmail.com
  */
-class Food extends Object {
+public class Food extends Object {
     private final int pricef;
     private int price;
 
@@ -31,10 +31,23 @@ class Food extends Object {
         this.pricef = price;
     }
 
-    void playSound() {
+    public Rectangle getFood() {
+        return food;
+    }
+
+    public void setSize(double x, double y) {
+        food.setWidth(x);
+        food.setHeight(y);
+    }
+
+    void playSound(String soundSrc) {
+        String src = "/snake/sound/beep.wav";
+        if (soundSrc != null)
+            src = soundSrc;
+
         try
         {
-            InputStream inputStream = getClass().getResourceAsStream("/snake/sound/beep.wav");
+            InputStream inputStream = getClass().getResourceAsStream(src);
             AudioStream audioStream = new AudioStream(inputStream);
             AudioPlayer.player.start(audioStream);
         }
