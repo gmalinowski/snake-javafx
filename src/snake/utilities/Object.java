@@ -2,6 +2,7 @@ package snake.utilities;
 
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.shape.Rectangle;
 
 
 /**
@@ -20,14 +21,14 @@ public class Object {
     }
 
 
-    public void move(int xOffSet, int yOffSet) {
+    public void move(double xOffSet, double yOffSet) {
         object.setTranslateX(object.getTranslateX() + xOffSet);
         object.setTranslateY(object.getTranslateY() + yOffSet);
     }
 
-    public void setCoordinates(Point2D point) {
-        object.setTranslateX(point.getX());
-        object.setTranslateY(point.getY());
+    public void setCoordinates(double x, double y) {
+        object.setTranslateX(x);
+        object.setTranslateY(y);
     }
 
     public Node getNode() {

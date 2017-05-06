@@ -14,15 +14,16 @@ import java.io.IOException;
  */
 public class GameState {
     private double hx, hy, fx, fy;
-    private int tailLength, points, foodTime, fps, bestScore;
-    private double [] rgb;
+    private int tailLength, fps;
+    private byte[] bestScore, points, foodTime;
+    private byte [][] rgb;
     private Direction direction;
     private double [] tx, ty;
     private double ww, wh;
     private boolean collision, fullScreen, sound;
 
-    private GameState(double hx, double hy, double fx, double fy, double[] rgb,
-                      int tailLength, int points, int bestScore, int foodTime, Direction direction,
+    private GameState(double hx, double hy, double fx, double fy, byte[][] rgb,
+                      int tailLength, byte[] points, byte[] bestScore, byte[] foodTime, Direction direction,
                       double [] tx, double [] ty, boolean collision, int fps, double ww, double wh, boolean fullScreen, boolean sound) {
         this.hx = hx;
         this.hy = hy;
@@ -47,8 +48,8 @@ public class GameState {
 
     }
 
-    public static void save(String fileSrc,double hx, double hy, double fx, double fy, double[] rgb,
-                            int tailLength, int points, int bestScore, int foodTime, Direction direction,
+    public static void save(String fileSrc, double hx, double hy, double fx, double fy, byte[][] rgb,
+                            int tailLength, byte[] points, byte[] bestScore, byte[] foodTime, Direction direction,
                             double [] tx, double [] ty, boolean collision, int fps, double ww, double wh, boolean fullScreen, boolean sound) {
         GameState gameState = new GameState(hx, hy, fx, fy, rgb, tailLength, points, bestScore,
                 foodTime, direction, tx, ty, collision, fps, ww, wh, fullScreen, sound);
@@ -95,19 +96,19 @@ public class GameState {
         this.fullScreen = fullScreen;
     }
 
-    public double[] getRgb() {
+    public byte[][] getRgb() {
         return rgb;
     }
 
-    public void setRgb(double[] rgb) {
+    public void setRgb(byte[][] rgb) {
         this.rgb = rgb;
     }
 
-    public int getBestScore() {
+    public byte[] getBestScore() {
         return bestScore;
     }
 
-    public void setBestScore(int bestScore) {
+    public void setBestScore(byte[] bestScore) {
         this.bestScore = bestScore;
     }
 
@@ -200,19 +201,19 @@ public class GameState {
         this.tailLength = tailLength;
     }
 
-    public int getPoints() {
+    public byte[] getPoints() {
         return points;
     }
 
-    public void setPoints(int points) {
+    public void setPoints(byte[] points) {
         this.points = points;
     }
 
-    public int getFoodTime() {
+    public byte[] getFoodTime() {
         return foodTime;
     }
 
-    public void setFoodTime(int foodTime) {
+    public void setFoodTime(byte[] foodTime) {
         this.foodTime = foodTime;
     }
 }

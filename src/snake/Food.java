@@ -41,20 +41,20 @@ public class Food extends Object {
     }
 
     void playSound(String soundSrc) {
-        String src = "/snake/sound/beep.wav";
-        if (soundSrc != null)
-            src = soundSrc;
-
-        try
-        {
-            InputStream inputStream = getClass().getResourceAsStream(src);
-            AudioStream audioStream = new AudioStream(inputStream);
-            AudioPlayer.player.start(audioStream);
-        }
-        catch (Exception e)
-        {
-            System.err.println(e.toString());
-        }
+        Runnable r = () -> {
+            String src = "/snake/sound/beep.wav";
+            if (soundSrc != null)
+                src = soundSrc;
+            try {
+                InputStream inputStream = getClass().getResourceAsStream(src);
+                AudioStream audioStream = new AudioStream(inputStream);
+                AudioPlayer.player.start(audioStream);
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     void newRandomFoodImg() {

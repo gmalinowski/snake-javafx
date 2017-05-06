@@ -13,6 +13,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -21,8 +22,16 @@ import snake.utilities.ChangeListenerMSG;
 import snake.utilities.Direction;
 import snake.utilities.GameState;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.lang.*;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 import static snake.utilities.Direction.*;
@@ -33,8 +42,12 @@ import static snake.utilities.Direction.*;
  * Created by Grzegorz Malinowski on 2017-04-28, 03:29.
  * gmalinowski@protonmail.com
  */
+//
+// MEMORY LEAK ON LINUX - RUN WITH JVM ARG: -Dprism.order=sw
+//    https://bugs.openjdk.java.net/browse/JDK-8156051
+//
 public class SnakeApp extends Application {
-    private int width, height, elementsSize, bestScore, points, foodSpeedBonus, setFps, frameCounter;
+    private int width, height, elementsSize, bestScore, points, foodSpeedBonus, setFps, setFpsToSave, frameCounter;
     private Pane root;
     private Stage stage;
     private Point2D snakeBorder;
@@ -85,20 +98,28 @@ public class SnakeApp extends Application {
         this.helpLbl.setId("helpLbl");
 
         this.helpLbl.setText(
-                        "H_____HELP\n" +
-                        "Esc___Exit\n" +
-                        "R_____Reset\n" +
-                        "S_____Sound on/off\n" +
-                        "F11___Full screen\n" +
-                        "Space_+ speed/price\n" +
-                        "Shift__- speed/price\n\n" +
+                        "Enter:\n" +
+                                "          show/hide HELP box\n" +
+                        "Esc:\n" +
+                                "          Exit\n" +
+                        "N:\n" +
+                                "          New Game\n" +
+                        "S:\n" +
+                                "          Sound on/off\n" +
+                        "F11:\n" +
+                                "          Full screen\n" +
+                        "Space:\n" +
+                                "          + speed/price\n" +
+                        "Shift:\n" +
+                                "          - speed/price\n\n" +
                         "Change tail color:\n" +
                         "1      Green\n" +
                         "2      YellowGreen (3000 - pts to unlock)\n" +
                         "3      Orange (6000)\n" +
                         "4      Blue (12000)\n"+
                         "5      Black (18000)\n" +
-                        "6      Random (30000)"
+                        "6      Random (30000)\n\n" +
+                                "Game state is saved automatically."
         );
     }
 
@@ -133,6 +154,10 @@ public class SnakeApp extends Application {
         food.newRandomFoodPosition(snakeBorder);
         root = food.addToScene(root);
         root = snake.addToScene(root);
+        Rectangle border = new Rectangle(width, height);
+        border.setStroke(Color.BLACK);
+        border.setFill(Color.TRANSPARENT);
+        root.getChildren().add(border);
 
     /////////////////////////////////////////////////////////////////// ANIMATION
         AnimationTimer animationTimer = new AnimationTimer() {
@@ -180,7 +205,7 @@ public class SnakeApp extends Application {
             food.newRandomFoodPosition(new Point2D(snake.getHeadBorder().getX(), snake.getHeadBorder().getY()));
             if (newFoodCounter > 100000) {
                 System.err.println("Couldn't generate new food tile.");
-                Platform.exit();
+                cleanUP();
             }
         }
         food.newRandomFoodImg();
@@ -270,34 +295,36 @@ public class SnakeApp extends Application {
     private void cleanUP() {
         try {
             loadLastGame(true);
-        } catch (Exception e) {
-            System.out.println(e.toString());
-        }
-        if (points > bestScore) {
-            bestScore = points;
-            bestScoreLbl.setText("/" + bestScore);
-        }
+        } catch (IOException e) {
+            System.out.println(e);
+        } finally {
 
-        points = 0;
-        pointsLbl.setText("" + points);
+            if (points >= bestScore) {
+                bestScore = points;
+                bestScoreLbl.setText("/" + bestScore);
+            }
 
-        foodTimeLbl.setText(15 + "");
-        foodTimeline.stop();
+            points = 0;
+            pointsLbl.setText("" + points);
+
+            foodTimeLbl.setText(15 + "");
+            foodTimeline.stop();
 
 //        generateFood();
-        if (newFoodTimelineBlink != null)
-            newFoodTimelineBlink.stop();
+            if (newFoodTimelineBlink != null)
+                newFoodTimelineBlink.stop();
             food.getNode().setVisible(true);
-        if ((pointsTimelineBlink != null)) {
-            pointsTimelineBlink.stop();
-            pointsLbl.setVisible(true);
+            if ((pointsTimelineBlink != null)) {
+                pointsTimelineBlink.stop();
+                pointsLbl.setVisible(true);
+            }
+            scoreBlinking = true;
+
+            changeSpeed(15);
+
+            newSnake();
+            newFood();
         }
-        scoreBlinking = true;
-
-        changeSpeed(15);
-
-        newSnake();
-        newFood();
     }
 
     private void switchHelp(int hide) {
@@ -325,12 +352,15 @@ public class SnakeApp extends Application {
 
 
         switch (code) {
-            case H:
+            case ENTER:
                 switchHelp(2);
                 break;
-            case R: cleanUP();
+            case N: cleanUP();
             break;
-            case ESCAPE: Platform.exit();
+            case ESCAPE:
+                setFpsToSave = setFps;
+                setFps = -1;
+                Platform.exit();
             break;
             case SHIFT: changeSpeed(setFps + 1);
             break;
@@ -383,11 +413,11 @@ public class SnakeApp extends Application {
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////     LOAD GAME STATE
-    private void loadLastGame(boolean onlyBest) {
-        try {
+    private void loadLastGame(boolean onlyBest) throws IOException {
             GameState gs = GameState.read(gameStateSrc);
-            bestScore = gs.getBestScore();
-            bestScoreLbl.setText("/" + gs.getBestScore());
+            int bestDec = Integer.parseInt(decryptString(gs.getBestScore()));
+            bestScore = bestDec;
+            bestScoreLbl.setText("/" + bestDec);
             if (onlyBest) return;
 
             if (!gs.isCollision()) {
@@ -396,9 +426,15 @@ public class SnakeApp extends Application {
                 fullScreen = gs.isFullScreen();
                 stage.setFullScreen(gs.isFullScreen());
 
-                snake.changeTailColor(Color.color(gs.getRgb()[0], gs.getRgb()[1], gs.getRgb()[2]));
+                String r, g, b;
+                r = decryptString(gs.getRgb()[0]);
+                g = decryptString(gs.getRgb()[1]);
+                b = decryptString(gs.getRgb()[2]);
+
+                snake.changeTailColor(Color.color(Double.parseDouble(r), Double.parseDouble(g), Double.parseDouble(b)));
 
                 changeSpeed(gs.getFps());
+                frameCounter = - 240;
 
                 snake.setHeadPosition(gs.getHx(), gs.getHy());
                 snake.setDirection(gs.getDirection());
@@ -416,44 +452,88 @@ public class SnakeApp extends Application {
                 food.getNode().setTranslateX(gs.getFx());
                 food.getNode().setTranslateY(gs.getFy());
 
-                food.setPrice(gs.getFoodTime());
-                foodTimeLbl.setText(gs.getFoodTime() + "");
-                points = gs.getPoints();
+                food.setPrice(Integer.parseInt(decryptString(gs.getFoodTime())) + 4);
+                foodTimeLbl.setText((Integer.parseInt(decryptString(gs.getFoodTime())) + 4) + "");
+                points = Integer.parseInt(decryptString(gs.getPoints()));
                 pointsLbl.setText("" + points);
 
                 if (food.getPrice() > 0)
                     pointsCountDown(false);
 
             }
-            } catch(IOException e){
-                e.printStackTrace();
-            }
+
     }
 
     private void saveGameState() {
         /////////////////////////////////////////////////////////////////////////////     ZAPIS STANU GRY - ON EXIT
 //        if (points > bestScore) bestScore = points;
 
-        double[] rgb = new double[3];
-        rgb[0] = snake.getTailColor().getRed();
-        rgb[1] = snake.getTailColor().getGreen();
-        rgb[2] = snake.getTailColor().getBlue();
+        byte[][] rgb = new byte[3][];
+        rgb[0] = encryptString(Double.toString(snake.getTailColor().getRed()));
+        rgb[1] = encryptString(Double.toString(snake.getTailColor().getGreen()));
+        rgb[2] = encryptString(Double.toString(snake.getTailColor().getBlue()));
         Point2D border = snake.getHeadBorder();
 
         GameState.save(
                 "snake.json",snake.getHeadPosition().getX(), snake.getHeadPosition().getY(),
                 food.getNode().getTranslateX(), food.getNode().getTranslateY(),
                 rgb,
-                snake.getTailSize(), points, bestScore, food.getPrice(),
+                snake.getTailSize(), encryptString(points + ""), encryptString(bestScore + ""), encryptString(food.getPrice() + ""),
                 snake.getCurrentDirection(),
                 snake.getTailXs(), snake.getTailYs(),
                 snake.isHeadCollidingWithTail(),
-                setFps,
+                setFpsToSave,
                 border.getX(),
                 border.getY(),
                 fullScreen,
                 soundON
         );
+    }
+
+    private byte[] encryptString(String arg) {
+        String key = "je8udo23ekD0i9k1";
+        Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
+        byte[] encrypted = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+            encrypted = cipher.doFinal(arg.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+        return encrypted;
+    }
+
+    private String decryptString(byte[] encrypted) {
+        String key = "je8udo23ekD0i9k1";
+        Key aesKey = new SecretKeySpec(key.getBytes(), "AES");
+        String decrypted = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, aesKey);
+            decrypted = new String(cipher.doFinal(encrypted));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+        return decrypted;
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////   START
@@ -469,8 +549,8 @@ public class SnakeApp extends Application {
             primaryStage.heightProperty().addListener(windowListener);
         }
 
-//        primaryStage.setMinWidth(width);
-//        primaryStage.setMinHeight(height);
+        primaryStage.setMinWidth(width);
+        primaryStage.setMinHeight(height);
 
 
         primaryStage.setScene(scene);
@@ -478,9 +558,16 @@ public class SnakeApp extends Application {
         primaryStage.setFullScreen(fullScreen);
         primaryStage.setTitle("Snake");
         stage = primaryStage;
-        loadLastGame(false);
-        primaryStage.fullScreenExitHintProperty().setValue("");
-        primaryStage.show();
+        try {
+            loadLastGame(false);
+        } catch (IOException e) {
+            System.out.println(e);
+            System.out.println("Cant't find file with game state. It's not a problem.");
+        } finally {
+            primaryStage.fullScreenExitHintProperty().setValue("");
+            primaryStage.show();
+        }
+
 
     }
 

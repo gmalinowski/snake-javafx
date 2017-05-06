@@ -162,14 +162,16 @@ public class Snake {
         Point2D lastPos2;
         head.move(xOffSet, yOffSet);
         setMoveLock = true;
+
         for (int i = 0; i < tail.size(); i++) {
             lastPos2 = new Point2D(tail.get(i).getNode().getTranslateX(), tail.get(i).getNode().getTranslateY());
-            tail.get(i).setCoordinates(lastPos);
+            tail.get(i).setCoordinates(lastPos.getX(), lastPos.getY());
             i++;
             if (i >= tail.size()) break;
             lastPos = new Point2D(tail.get(i).getNode().getTranslateX(), tail.get(i).getNode().getTranslateY());
-            tail.get(i).setCoordinates(lastPos2);
+            tail.get(i).setCoordinates(lastPos2.getX(), lastPos2.getY());
         }
+
     }
 
     Direction getCurrentDirection() {
